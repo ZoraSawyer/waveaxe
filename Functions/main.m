@@ -1,9 +1,15 @@
-
 clear all
 clc
 format long
  
 global SMesh CMesh Material Domain Control ConfigFileName IOPath
+
+cur_dir = pwd;
+func_dir = cur_dir;
+config_dir = fullfile(cur_dir, '..', 'Config Files');
+
+addpath(genpath(func_dir));
+addpath(genpath(config_dir));
 
 disp(' X-FEM HYDRAULIC FRACTURE SIMULATOR ')
 tic
