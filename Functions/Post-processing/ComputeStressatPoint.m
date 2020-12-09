@@ -20,10 +20,10 @@ function [S,e] = ComputeStressatPoint(X,inputfield,e)
 %           e : element containing point X
 
 % Written by Matin Parchei Esfahani, University of Waterloo, Sep. 2015
+% last modified Oct. 2017 (Version 2)
+
 
 global SMesh
-
-nne = size(SMesh.conn,2);                   % number of nodes per element
 
 if nargin == 2                              % if element containing point X is not known
     e = FindElement(X);                     % find element containing point X
@@ -33,18 +33,30 @@ enodes = SMesh.conn(e,:);                   % element connectivity
 sctr   = GetScatter(enodes);                % element DOFs
 xI     = SMesh.nodes(enodes,:);             % element nodal coordinates
 
+if SMesh.Crnum(e)                           % if element contains the crack 
+    crnum = SMesh.Crnum(e);                 % crack number
+else                                        % if element doesn't contain the crack
+    crnum = 1;                              % LS of the first crack is passed to Bmatrix
+end
+
+if strcmp(SMesh.type,'Q4')
+    fLSrange = 5:8;                         % range of normal LS for each element
+elseif strcmp(SMesh.type, 'Q9')
+    fLSrange = 5:8;                         % range of normal LS for each element
+end
+
 xi = ParentCoordinates(X,SMesh.type,xI);    % global coordinates transfered to 2D parent coordinates
 
 if size(inputfield,2) == 1                                      % input field is the displacement field, d (nDoF X 1).
     % computing actual stress values
     D = SolidConstitutive(e);                                   % gives stress strain relation based on the constitutive law
     B = Bmatrix(xi, xI, enodes, SMesh.EnrType(enodes), ...
-        SMesh.eLS(e,nne+1:end), SMesh.type);                    % B matrix at point X
+        SMesh.eLS(e,fLSrange,crnum), SMesh.type);               % B matrix at point X
     S = D*B*inputfield(sctr);                                   % S = [Sxx; Syy; Sxy]
     
 else % input field is the stress field, (3 X nnodes for 2D or 6 X nnodes for 3D)
      % computing smoothed (mapped) stress field from nodal values of stress
-    N = lagrange_basis(SMesh.type,xi,1);                        % shape functions at point X
+    N = LagrangeBasis(SMesh.type,xi,1);                        % shape functions at point X
     S = inputfield(:,enodes)*N;                                 % S = [Sxx; Syy; Sxy]
 end
 

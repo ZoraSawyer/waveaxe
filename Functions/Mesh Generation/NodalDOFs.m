@@ -1,7 +1,4 @@
 function [ dof ] = NodalDOFs( node )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
-
 global SMesh
 
 nsd      = size(SMesh.nodes,2);   % number of space DOFs
@@ -20,4 +17,3 @@ end
 dof = [dofSTD dofENR];  % Total DOFs of the node
 
 end
-

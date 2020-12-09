@@ -19,7 +19,7 @@ else
     epsilon = 0.00001;
     inc     = 1;
     while (inc < iter)  % Newton-Raphson process for local coordinates in other element types.
-        [N,dNdxi]=lagrange_basis(elemType,coord);   % compute shape functions
+        [N,dNdxi]=LagrangeBasis(elemType,coord);   % compute shape functions
                                                                            
         x = N'*nodes(:,1);                                                 
         y = N'*nodes(:,2);

@@ -1,8 +1,8 @@
-function conn=tricheck(node,conn,verbose)   % Edited November 3, 2011
+function conn=Tricheck(node,conn,verbose)   % Edited November 3, 2011
 
 % FUNCTION
 %
-%   conn=tricheck(node,conn,verbose)
+%   conn=Tricheck(node,conn,verbose)
 %
 % This function check wether a triangle has a negative Jacobian, and if
 % so reorders it so that the the Jacobian is positive.
@@ -20,7 +20,7 @@ Ojac = [];                                                                 % Lin
 for e=1:size(conn,1)
   
   sctr=conn(e,:);
-  [N,dNdxi]=lagrange_basis('T3',[1/3 1/3]);
+  [N,dNdxi]=LagrangeBasis('T3',[1/3 1/3]);
   detJ=det(node(sctr,:)'*dNdxi);
   if ( abs(detJ) < 0.0001 )                                                % Line 25 & 28: condition for "if" and "elseif" changed.
     Ojac = [Ojac; e];                                                      % Line 21 added to the code.

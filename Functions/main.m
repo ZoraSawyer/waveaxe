@@ -16,7 +16,7 @@ tic
 
 disp([num2str(toc),': Loading Mesh and Config file...']);
 ConfigFileName = 'ConfigFile_Twocrack';
-BuildMesh_v17
+BuildMesh
 
 nsd = size(SMesh.nodes,2);                          % number of spacedimensions
 
@@ -143,7 +143,7 @@ for np = 1:npulse
 
 
     % dtmin = Control.Time.dtmin;             % minimum time increment
-    % [dpw,~,~] = Wellbore_v2(t0,'time');     % wellbore pressure at time t0
+    % [dpw,~,~] = Wellbore(t0,'time');     % wellbore pressure at time t0
     dt = Control.Time.dtmin;                % time increament
     t0 = -dt;                               % initial time
     t  = t0 + dt;
@@ -231,7 +231,7 @@ for np = 1:npulse
 
 
             % Update WB pressure
-            [dpw,~,~] = Wellbore_v2(t,'time');      % wellbore pressure at time t
+            [dpw,~,~] = Wellbore(t,'time');      % wellbore pressure at time t
     %         pw = -Sn_max + dpw;                     % update wellbore pressure
             pw = p_hyd + dpw;                       % update wellbore pressure
             Cwb  = 2*pi*Domain.WB(1).radius / length(WBnodes);
@@ -248,14 +248,14 @@ for np = 1:npulse
 
            
             % Newton-Raphson iteration    
-            [Pvar,q,NR,NRs,NRf,converged] = NRiter_v4(Force, t, dt, s_dof, f_dof, fixed_dofs, Pvar0, Pvar_1, dynamic_ON);
+            [Pvar,q,NR,NRs,NRf,converged] = NRiter(Force, t, dt, s_dof, f_dof, fixed_dofs, Pvar0, Pvar_1, dynamic_ON);
             if ~converged   % terminates the program if convergence is failed
                 return
             end
 
             disp([num2str(toc),': Computing fracture aperture'])
             % Compute fracture aperture
-            Aperture_v4(Pvar(1:s_dof));
+            Aperture(Pvar(1:s_dof));
    %%         
    %% 
     %         CMesh(1).w CMesh(2).w Pvar(s_dof+1:s_dof+f_dof)
@@ -311,7 +311,7 @@ for np = 1:npulse
     %     end Q_avg_old = Q_avg; Vinj_old  = Vinj;
 
         %% Post processing
-        [Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] = PostProcessing_v4(Pvar, Pvar0, Pvar_1, ...
+        [Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] = PostProcessing(Pvar, Pvar0, Pvar_1, ...
             stdDOFs, enrDOFs, Vcr, Vinj, NR, t, nt, save_on, dynamic_ON, dt);
 
         if ~prop
@@ -342,7 +342,7 @@ for np = 1:npulse
         %     L0  = L;
         %     tip = CMesh(1).tip_nodes;          % tip node of the crack
         %     L   = CMesh(1).CrackLength(tip);   % fracture length
-        %     [~,t,~] = Wellbore_v2(L);          % updating wellbore pressure and time
+        %     [~,t,~] = Wellbore(L);          % updating wellbore pressure and time
         %     lambda  = lambda * sqrt(L0/L);     % updating lamdba (dp = lambda * dQ)
         %     dt = max(t - t0, dtmin)
             dt = Control.Time.dtmin

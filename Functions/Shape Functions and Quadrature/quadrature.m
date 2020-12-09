@@ -1,17 +1,17 @@
-function [W,Q] = quadrature( quadorder, qt, sdim )
+function [W,Q] = Quadrature( quadorder, qt, sdim )
 
 % The function quadrature returns a n x 1 column vector W of quadrature
 % weights and a n x dim matrix of quadrature points, where n is the
 % number of quadrature points.  The function is called as follows:
 %
-%   [W,Q]=quadrature( nint, type, dim )
+%   [W,Q] = Quadrature( nint, type, dim )
 %
 % nint is the quadrature order, type is the type of quadrature
 % (i.e. gaussian, triangular, etc.. ) and dim is the number of spacial
 % dimentions of the problem.  The default for type is GAUSS and the
 % default for dim is unity.
 %
-% wrQ=quadrature(nint,'TRIANGULAR',2);written by Jack Chessa
+% wrQ= Quadrature(nint,'TRIANGULAR',2);written by Jack Chessa
 %            j-chessa@northwestern.edu
 % Department of Mechanical Engineering 
 % Northwestern University

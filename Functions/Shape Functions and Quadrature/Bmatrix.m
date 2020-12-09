@@ -38,7 +38,7 @@ if any(enrnodes)                        % enriched nodes exist
     count = 0;
     switch sign
         case 0
-            [Nv,~] = lagrange_basis('Q4',xi,1);    % calculating shape functions for interpolating LS (linear)
+            [Nv,~] = LagrangeBasis('Q4',xi,1);    % calculating shape functions for interpolating LS (linear)
             f = fI(1:4)*Nv;
             if f>=0
                 phi = 0.5;
@@ -52,7 +52,7 @@ if any(enrnodes)                        % enriched nodes exist
     end
 end
 
-[~,dNdxi] = lagrange_basis(etype,xi,1);     % Derivatives of shape functions wrt parent coordinates
+[~,dNdxi] = LagrangeBasis(etype,xi,1);     % Derivatives of shape functions wrt parent coordinates
 B = zeros(nsd*(nsd+1)/2,nsd*(nne+enrH));
 J = dNdxi'*xI;
 BI = J\dNdxi';                              % derivatives wrt x-y coordinates
