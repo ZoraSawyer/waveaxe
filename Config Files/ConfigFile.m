@@ -100,7 +100,7 @@ Material.fluid.mu  = 1E-3;                                          % mu, dynami
 Material.fluid.constitutive.wmin = 1E-3;                            % minimum aperture for fluid constitutive model near the fracture tip
 
 % Leak-off
-b = 7.70 % sqrt( porosity x permeability )
+b = 7.70; % sqrt( porosity x permeability )
 phi = 0.25;
 Material.solid.porosity        = phi; % .1322;                             % porosity of the solid matrix [%]
 Material.solid.permeability    = (b^2/phi)/1000*0.9869E-12  ;% 2.56600058E-16;                    % permeability of the solid matrix [m^2]

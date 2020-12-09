@@ -15,7 +15,7 @@ disp(' X-FEM HYDRAULIC FRACTURE SIMULATOR ')
 tic
 
 disp([num2str(toc),': Loading Mesh and Config file...']);
-ConfigFileName = 'ConfigFile_Twocrack';
+ConfigFileName = 'ConfigFile';
 BuildMesh
 
 nsd = size(SMesh.nodes,2);                          % number of spacedimensions
