@@ -53,16 +53,14 @@ end
 
 msg_len = 1;
 disp([num2str(toc), ': Newton-Raphson Iteration'])
-msg = sprintf('ITERATION  ');
-fprintf(msg)
+fprintf('ITERATION  ');
 
 update = 1;
 
 while (iter <= max_iter) && ~converged
     
     fprintf(repmat('\b',1,msg_len))
-    msg = sprintf('%d:',iter);
-    fprintf(msg)
+    fprintf('%d:',iter);
     msg_len = numel(num2str(iter))+1;
     
     % Computer tangential matrices

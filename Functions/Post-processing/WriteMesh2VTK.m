@@ -13,9 +13,6 @@ if nargin < 6
     cell_data = [];
 end
 
-%msg = sprintf('Writting results to "%s"\n', filename);
-%disp(msg)
-% disp([': Writting results to ',filename]);
 nn = size(nodes,1); % number of nodes (points)
 nsd = size(nodes,2); % number of space dimensions
 ne = size(conn,1); % number of elements (cells)

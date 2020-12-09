@@ -349,8 +349,7 @@ global SMesh CMesh Material Domain Control ConfigFileName OutPath
             t = t + dt;
             dynamic_ON = Control.Dynamic_ON;
             save_on = 1;
-            msg = sprintf('\n t = %0.6f s \n', t);
-            fprintf(msg)
+            fprintf('\nt = %0.6f s \n', t);
         else
             save_on = 0;
         end
