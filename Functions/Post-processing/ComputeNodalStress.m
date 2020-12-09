@@ -1,4 +1,4 @@
-function [ S ] = ComputeNodalStress_v3( d )
+function [ S ] = ComputeNodalStress( d )
 
 % Returns a smooth matrix of nodal stresses
 %

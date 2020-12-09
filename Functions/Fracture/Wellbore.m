@@ -1,4 +1,4 @@
-function [pw,t,Q] = Wellbore_v2(var,mode)
+function [pw,t,Q] = Wellbore(var,mode)
 % Returns wellbore pressure, pw, at length L
 
 global Material Control Domain CMesh 

@@ -1,4 +1,4 @@
-function PropagateCracks_v8(dir_cr,nstep,t)
+function PropagateCracks(dir_cr,nstep,t)
 % This function updates the crack geometry, mesh and related data
 % structures when the cracks propagate.
 %
@@ -46,8 +46,8 @@ for i = 1:ntips
         if strcmp(SMesh.type,'Q4') || strcmp(SMesh.type,'Q9')
             etp = 'Q4';
         end
-        [~,dNdxi] = lagrange_basis(etp,[0,0],1); % evaluated shape functions at zi
-    %     [~,dNdxi]=Q4_lagrange_basis([0,0]); 
+        [~,dNdxi] = LagrangeBasis(etp,[0,0],1); % evaluated shape functions at zi
+    %     [~,dNdxi]=Q4_LagrangeBasis([0,0]); 
 
         dxdz = dNdxi'*xI;
         dNdx = dxdz\dNdxi';%(dNdxi*inv(dxdz))'; % Derivative of the shape functions wrt glob coord sys
@@ -261,7 +261,7 @@ for nc = 1:ntips
 end
 cell_data(1).name = 'Inclusion';
 cell_data(1).data = SMesh.einc;
-WriteMesh2VTK_v2(filename,description, SMesh.nodes,SMesh.conn,scalardata,cell_data);
+WriteMesh2VTK(filename,description, SMesh.nodes,SMesh.conn,scalardata,cell_data);
 
 for i = 1:ntips
     filestring = ['crack', num2str(i), '.vtk.', num2str(nstep)];
@@ -270,7 +270,7 @@ for i = 1:ntips
     S = struct('name',{},'data',{});
     S(1).name = 'ID';
     S(1).data = 1:size(CMesh(i).nodes,1);
-    WriteMesh2VTK_v2(filename,description, CMesh(i).nodes,CMesh(i).conn,S);
+    WriteMesh2VTK(filename,description, CMesh(i).nodes,CMesh(i).conn,S);
 end
 
 end

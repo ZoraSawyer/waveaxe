@@ -1,4 +1,4 @@
-function BuildMesh_v17()
+function BuildMesh()
 %****************************************
 % This function builds a structure mesh
 % The mesh date is written to a file in VTK form to be read by paraview.
@@ -30,7 +30,7 @@ run(ConfigFileName);
 % MESH GENERATION
 if strcmp(MeshInput,'Gmsh')
     
-    [nodes,conn,left_edge,right_edge,top_edge,bot_edge] = LoadMesh_v2(MeshFileName, nsd);
+    [nodes,conn,left_edge,right_edge,top_edge,bot_edge] = LoadMesh(MeshFileName, nsd);
     
     nn  = size(nodes,1);        % number of nodes
     ne  = size(conn,1);         % number of elements
@@ -77,7 +77,7 @@ if strcmp(MeshInput,'Gmsh')
     
 elseif strcmp(MeshInput,'Built-in')
 
-    [sx,sy,nex,ney] = MeshSegments_v2(meshtype, elemtype, Lx, Ly, nex, ney, s0x, s0y, rx, ry);
+    [sx,sy,nex,ney] = MeshSegments(meshtype, elemtype, Lx, Ly, nex, ney, s0x, s0y, rx, ry);
 
     switch elemtype
         case 'Q4'
@@ -508,7 +508,7 @@ for nc = 1:ncrack
 end
 cell_data(1).name = 'Inclusion';
 cell_data(1).data = elem_inc;
-WriteMesh2VTK_v2(filename,description, SMesh.nodes,SMesh.conn,scalardata,cell_data);
+WriteMesh2VTK(filename,description, SMesh.nodes,SMesh.conn,scalardata,cell_data);
 
 for nc = 1:ncrack
     filestring = ['crack', num2str(nc), '.vtk.0'];
@@ -517,7 +517,7 @@ for nc = 1:ncrack
     S = struct('name',{},'data',{});
     S(1).name = 'ID';
     S(1).data = 1:size(CMesh(nc).nodes,1);
-    WriteMesh2VTK_v2(filename,description, CMesh(nc).nodes,CMesh(nc).conn,S);
+    WriteMesh2VTK(filename,description, CMesh(nc).nodes,CMesh(nc).conn,S);
 end
 
 disp([num2str(toc),': Done.']);

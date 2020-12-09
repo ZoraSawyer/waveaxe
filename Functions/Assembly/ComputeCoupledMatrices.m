@@ -1,4 +1,4 @@
-function [M, Kuu, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL, S11, S12] = Compute_Coupled_Matrices_v15(d,p,d0,p0,t,update)
+function [M, Kuu, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL, S11, S12] = ComputeCoupledMatrices(d,p,d0,p0,t,update)
 
 % Computes tangential matrices required for a fully coupled HF model
 %   Input - d: nodal values of solid displacements
@@ -98,11 +98,11 @@ if update     % Domain integrals must be updated
         if ismember(e,SMesh.EnrElements)    % Crack element (Sub-triangles must be defined)
             nq = 5;                                                     % order of quadrature rule for each sub-triangle              
             crnum = SMesh.Crnum(e);                                     % coresponding crack mesh
-            [W,Q] = discontQ4quad(nq,SMesh.eLS(e,fLSrange,crnum));      % quadrature points and weights
+            [W,Q] = DiscontQ4quad(nq,SMesh.eLS(e,fLSrange,crnum));      % quadrature points and weights
             nq = length(W);                                             % total number of quadrature points
         else                                % uncracked elements (may contain enriched nodes)
             crnum = 1;                                                  % for uncracked elements LS of the first crack is passed to Bmatrix
-            [W,Q] = quadrature(nq, 'GAUSS', nsd);                       % quadrature points and weights
+            [W,Q] = Quadrature(nq, 'GAUSS', nsd);                       % quadrature points and weights
             nq    = length(W);                                          % total number of quadrature points
         end
 
@@ -218,7 +218,7 @@ for nc = 1:ncrack
         t0 = CMesh(nc).t0(e);                   % initiation time of the fracture segment
         
         nq = 5;                                 % Order of quadrature
-        [W,Q] = quadrature(nq, 'GAUSS', nsd-1); % quadrature points and weights
+        [W,Q] = Quadrature(nq, 'GAUSS', nsd-1); % quadrature points and weights
         nq    = length(W);                      % total number of quadrature points
 
         C_enodes = CMesh(nc).conn(e,:);         % crack element connectivity (CMesh)

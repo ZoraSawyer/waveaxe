@@ -1,4 +1,4 @@
-function [] = Aperture_v4(d)
+function [] = Aperture(d)
 
 % Computes fracture aperture
 %

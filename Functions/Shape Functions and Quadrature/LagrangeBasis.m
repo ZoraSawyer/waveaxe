@@ -1,9 +1,9 @@
-function [Nv,dNdxi]=lagrange_basis(type,coord,dim)
+function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
   
 % returns the lagrange interpolant basis and its gradients w.r.t the
 % parent coordinate system.
 %
-%         [N(xi),dNdxi(xi)]=lagrange_basis(type-order,coord,dim)
+%         [N(xi),dNdxi(xi)]=LagrangeBasis(type-order,coord,dim)
 %
 %   type is the toplogical class of finite element it is in the general
 %   form 'topology-#of nodes' ie a three node triangel is T3 a four

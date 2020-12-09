@@ -1,5 +1,5 @@
 function [Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] =...
-    PostProcessing_v4(Pvar, Pvar0, Pvar_1, stdDOFs, enrDOFs, Q, Q_avg,...
+    PostProcessing(Pvar, Pvar0, Pvar_1, stdDOFs, enrDOFs, Q, Q_avg,...
     NR, t, n, save_on, dynamic_ON, dt)
 
 % POST PROCESSING:
@@ -38,7 +38,7 @@ nsd = size(SMesh.nodes,2);                  % number of space dimensions
 % ========================= COMPUTE SOLID STRESS ==========================
 % Compute Nodal Stresses
 disp([num2str(toc),': Computing stress in solid'])
-[S] = ComputeNodalStress_v3(Pvar(1:s_dof));   % Compute stress at nodes
+[S] = ComputeNodalStress(Pvar(1:s_dof));   % Compute stress at nodes
 
 % in situ stress
 Sx  = Domain.InsituStress.Sx;   % in situ stress in x-direction
@@ -55,7 +55,7 @@ disp([num2str(toc),': Evaluating fracture propagation criterion'])
 if ~isempty(CMesh(1).conn)   % at least one fracture exists
     % CHECKING FOR FRACTURE PROPAGATION
     gplot = 0;  % plot mode is on when gplot = 1; used for debugging purposes
-    [prop_dir] = PropCriterion_v4(S_tot,gplot);    % Direction of fracture propagation
+    [prop_dir] = PropCriterion(S_tot,gplot);    % Direction of fracture propagation
 else                         % no fractrue exists
     prop_dir = [0 0];
 end
@@ -70,7 +70,7 @@ if norm(prop_dir) % fracture propagation
     Pvar0_old  = Pvar0;
     Pvar_1_old = Pvar_1;
     
-    PropagateCracks_v8(prop_dir,n,t)       % Updating levelsets and enriched DOFs
+    PropagateCracks(prop_dir,n,t)       % Updating levelsets and enriched DOFs
                                            % based on the new fracture configuration
 
     enrDOFs = nsd*length(SMesh.EnrNodes);  % updating number of enriched DOFs
@@ -129,7 +129,7 @@ end
 if ~isempty(CMesh(1).conn)     % at least one fracture exists
     disp([num2str(toc),': Computing fracture aperture'])
     % Computing fracture aperture
-    Aperture_v4(Pvar(1:s_dof));
+    Aperture(Pvar(1:s_dof));
     
     % Find location of the physical tip
     [ phys_tip ] = FindPhysicalTip;
@@ -141,7 +141,7 @@ end
 % ========================= COMPUTE FLUID FLUX ============================
 % Compute fluid flux
 % disp([num2str(toc),': Computing fluid flux'])
-% ComputeFlux_v2(Pvar(s_dof+1:end));
+% ComputeFlux(Pvar(s_dof+1:end));
 % gplot = 0;
 % if gplot
 %     for nc = 1:ncrack
@@ -182,7 +182,7 @@ if save_on && ~mod(n,Control.Postprocessing.OutputFreq)
     scalardata(9).name = 'ay';       scalardata(9).data = a(ydofs);
     
     filename = [IOPath 'Solution.vtk.' num2str(n)];    description = 'solution';   
-    WriteMesh2VTK_v2(filename, description, deformedshape, SMesh.conn, scalardata);
+    WriteMesh2VTK(filename, description, deformedshape, SMesh.conn, scalardata);
     
     % Saving NR iterations
     filename = [IOPath 'NR.dat'];
@@ -219,7 +219,7 @@ if save_on && ~mod(n,Control.Postprocessing.OutputFreq)
             fracdata(4).name = 'aperture';  fracdata(4).data = aperture;
 
             filename = [IOPath 'Fracture' num2str(nc) '.vtk.' num2str(n)];    description = 'fracture';   
-            WriteMesh2VTK_v2(filename, description, deformedshape, CMesh(nc).conn2D, fracdata);
+            WriteMesh2VTK(filename, description, deformedshape, CMesh(nc).conn2D, fracdata);
 
             tip_location = CMesh(nc).nodes(CMesh(nc).tip_nodes,:); % Location of the fracture tip
 

@@ -1,4 +1,4 @@
-function WriteMesh2VTK_v2(filename,description, nodes,conn,scalar_data,cell_data)
+function WriteMesh2VTK(filename,description, nodes,conn,scalar_data,cell_data)
 % This funciton write FEM mesh data to a file in VTK format
 % INPUTS:
 % nodes = array of nodal coordinates (n x nsd)
