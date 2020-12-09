@@ -1,6 +1,6 @@
-global IOPath
+global OutPath
 
-filename = [IOPath 'WB_NR_UD.dat'];
+filename = [OutPath 'WB_NR_UD.dat'];
 fileID = fopen(filename,'r');
 count = 1;
 niter = 200;

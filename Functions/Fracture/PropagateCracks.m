@@ -10,7 +10,7 @@ function PropagateCracks(dir_cr,nstep,t)
 global SMesh % Data for Solid Mesh
 global CMesh % Data for crack mesh.
 
-global IOPath % Input/Output files path
+global OutPath % Input/Output files path
 
 %check input data against CMesh data
 
@@ -245,7 +245,7 @@ for i = 1:ntips
 end
 
 % Write mesh to files
-filename = [IOPath 'mesh.vtk.' num2str(nstep)];
+filename = [OutPath 'mesh.vtk.' num2str(nstep)];
 description = 'Solid Mesh Data';
 scalardata(1).name = 'ID';
 scalardata(1).data = 1:size(SMesh.nodes,1);
@@ -266,7 +266,7 @@ WriteMesh2VTK(filename,description, SMesh.nodes,SMesh.conn,scalardata,cell_data)
 
 for i = 1:ntips
     filestring = ['crack', num2str(i), '.vtk.', num2str(nstep)];
-    filename = [IOPath filestring];
+    filename = [OutPath filestring];
     description = 'Crack Mesh Data';
     S = struct('name',{},'data',{});
     S(1).name = 'ID';

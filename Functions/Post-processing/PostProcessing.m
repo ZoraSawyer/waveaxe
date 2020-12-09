@@ -18,7 +18,7 @@ function [Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] =...
 % Written by Matin Parchei Esfahani, University of Waterloo, April 2016
 
 
-global SMesh CMesh Domain Control IOPath
+global SMesh CMesh Domain Control OutPath
 
 disp([num2str(toc), ': Post processing']);
 
@@ -178,11 +178,11 @@ if save_on && ~mod(n,Control.Postprocessing.OutputFreq)
     scalardata(8).name = 'ax';       scalardata(8).data = a(xdofs);    
     scalardata(9).name = 'ay';       scalardata(9).data = a(ydofs);
     
-    filename = [IOPath 'Solution.vtk.' num2str(n)];    description = 'solution';   
+    filename = [OutPath 'Solution.vtk.' num2str(n)];    description = 'solution';   
     WriteMesh2VTK(filename, description, deformedshape, SMesh.conn, scalardata);
     
     % Saving NR iterations
-    filename = [IOPath 'NR.dat'];
+    filename = [OutPath 'NR.dat'];
     fileID = fopen(filename,'a');
     fprintf(fileID,'%e\n',NR);
     fclose(fileID);
@@ -215,20 +215,20 @@ if save_on && ~mod(n,Control.Postprocessing.OutputFreq)
             fracdata(3).name = 'pressure';  fracdata(3).data = pressure;
             fracdata(4).name = 'aperture';  fracdata(4).data = aperture;
 
-            filename = [IOPath 'Fracture' num2str(nc) '.vtk.' num2str(n)];    description = 'fracture';   
+            filename = [OutPath 'Fracture' num2str(nc) '.vtk.' num2str(n)];    description = 'fracture';   
             WriteMesh2VTK(filename, description, deformedshape, CMesh(nc).conn2D, fracdata);
 
             tip_location = CMesh(nc).nodes(CMesh(nc).tip_nodes,:); % Location of the fracture tip
 
             % Writing location of the fracture tip to file
             tip = CMesh(nc).tip_nodes;                             % tip node of the fracture
-            filename = [IOPath 'TipLocation' num2str(nc) '.dat'];
+            filename = [OutPath 'TipLocation' num2str(nc) '.dat'];
             fileID = fopen(filename,'a');
             fprintf(fileID,'%f %f %f %f %f\n',t,tip_location,CMesh(nc).CrackLength(tip),phys_tip(nc));
             fclose(fileID);
             
             % Saving fracture volume to file
-            filename = [IOPath 'Flowrate' num2str(nc) '.dat'];
+            filename = [OutPath 'Flowrate' num2str(nc) '.dat'];
             fileID = fopen(filename,'a');
             fprintf(fileID,'%f %f %f\n',t,Q(nc),Q_avg(nc));
             fclose(fileID);

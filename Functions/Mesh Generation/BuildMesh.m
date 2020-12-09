@@ -18,7 +18,7 @@ function BuildMesh(Lx, Ly, nex, ney)
 clear;
 global Domain SMesh CMesh
 global ConfigFileName
-global IOPath
+global OutPath
 
 disp('');
 disp('** Running Mesh Generator **');
@@ -457,7 +457,7 @@ SMesh.MeshForm    = MeshForm;
 SMesh.WBnodes     = WBnodes;
 
 % Write initial mesh to files
-filename = [IOPath 'mesh.vtk.0'];
+filename = [OutPath 'mesh.vtk.0'];
 description = 'Initial Solid Mesh Data';
 scalardata(1).name = 'ID';
 scalardata(1).data = 1:nn;
@@ -480,7 +480,7 @@ WriteMesh2VTK(filename,description, SMesh.nodes,SMesh.conn,scalardata,cell_data)
 
 for nc = 1:ncrack
     filestring = ['crack', num2str(nc), '.vtk.0'];
-    filename = [IOPath filestring];
+    filename = [OutPath filestring];
     description = 'Initial Crack Mesh Data';
     S = struct('name',{},'data',{});
     S(1).name = 'ID';

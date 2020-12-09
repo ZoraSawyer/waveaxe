@@ -2,7 +2,6 @@ clear
 clc
 format long
  
-global SMesh CMesh Material Domain Control ConfigFileName IOPath
 
 cur_dir = pwd;
 func_dir = cur_dir;
@@ -155,6 +154,7 @@ for np = 1:npulse
         for n = 1:ncrack
             CMesh(n).t0 = t*ones(1,length(CMesh(n).t0));
         end
+global SMesh CMesh Material Domain Control ConfigFileName OutPath
     end
     
     save_on = 1;                            % indicates when to save variables

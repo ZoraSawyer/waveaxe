@@ -5,14 +5,14 @@
 
 % Written by Matin Parchei Esfahani, University of Waterloo, Sep. 2017
 
-global IOPath CMesh
+global OutPath CMesh
 
 nplot = 5;                 % number of curves for each figure
 dn = floor((nt-1)/nplot);   % plot frequency
 
 for nc = 1:ncrack
     
-    filename = [IOPath 'TipLocation' num2str(nc) '.dat'];
+    filename = [OutPath 'TipLocation' num2str(nc) '.dat'];
     fileID = fopen(filename,'r');
     count = 1;
     values = zeros(nt-1,5);
@@ -60,7 +60,7 @@ for nc = 1:ncrack
     xlabel('fracture length (m)','FontSize', 20, 'FontWeight', 'bold')
        
     for i = 1:dn:nt-1
-        filename = [IOPath 'Fracture' num2str(nc) '.vtk.' num2str(i)];
+        filename = [OutPath 'Fracture' num2str(nc) '.vtk.' num2str(i)];
         fileID = fopen(filename,'r');
         
         s = textscan(fileID, '%s', 'delimiter', '\n');
