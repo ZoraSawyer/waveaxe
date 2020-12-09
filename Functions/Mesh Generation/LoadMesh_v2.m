@@ -16,9 +16,9 @@ function [nodes, conn, left_edge, right_edge, top_edge, bot_edge] = LoadMesh_v2(
 
 % Written by Matin Parchei Esfahani, University of Waterloo, Sep. 2017
 
-global IOPath
+global InPath
 
-filename = [IOPath meshfile '.msh'];
+filename = [InPath meshfile '.msh'];
 fileID = fopen(filename,'r');
 
 s = textscan(fileID, '%s', 'delimiter', '\n');
