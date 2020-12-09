@@ -1,9 +1,10 @@
 global x0 y0 xs ys
-global Domain Material Control IOPath
+global Domain Material Control IOPath InPath
 
 % INPUT/OUTPUT PATH
 % Output files will be saved to this path (needs a "\" at the end)
-IOPath = 'C:\Users\rgracie\Documents\MATLAB\tmpdump\';    
+IOPath = 'C:\Users\endri\Documents\Matlab Results\'; 
+InPath = 'C:\Users\endri\Documents\Codes\waveaxe\inputfiles\';
 % NOTE: Input mesh file e.g., 1WB9in_Q4S_v2.msh must be in this folder also
 MeshInput = 'Gmsh';                 % 'Built-in' : use the biult-in mesh generator
                                     % 'Gmsh'     : import Gmsh mesh file
