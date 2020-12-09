@@ -1,4 +1,3 @@
-
 global IOPath
 
 filename = [IOPath 'WB_NR_UD.dat'];

@@ -1,6 +1,5 @@
-function [ phys_tip ] = FindPhysicalTip()
-
-% Finds location of the physical tip (t_coh = 0) 
+function phys_tip = FindPhysicalTip()
+% FINDPHYSICALTIP Finds location of the physical tip (t_coh = 0) 
 % 
 % output : Phys_tip: location of the physical tip in crack coordinate
 % system (s=0 at the WB and s=L at the mathematical tip)

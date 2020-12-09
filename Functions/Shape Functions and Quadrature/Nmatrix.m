@@ -1,6 +1,5 @@
 function [N,J] = Nmatrix(xi,xI,conn,enrnodes,fI,etype,sign)
-
-% Computes FEM/XFEM shape functions and the corresponding Jacobian at a
+%NMATRIX Computes FEM/XFEM shape functions and the corresponding Jacobian at a
 % given point of an element
 %
 %   Input

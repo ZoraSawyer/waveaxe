@@ -1,5 +1,5 @@
-function [] = ComputeFlux(p)
-% Computes fluid flux in a 1D fracture
+function ComputeFlux(p)
+% COMPUTEFLUX Computes fluid flux in a 1D fracture
 %
 % Input
 %       p : fluid pressure vector

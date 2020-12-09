@@ -1,6 +1,5 @@
-function [prop_dir] = PropCriterion(inputfield,gplot)
-
-% Compares the stress state of the domain against the fracture propagation
+function prop_dir = PropCriterion(inputfield,gplot)
+% PROPCRITERION Compares the stress state of the domain against the fracture propagation
 % criterion and returns the propagation direction for each crack tip.
 %
 %   Input
@@ -110,7 +109,7 @@ for nc = 1:ncrack
 
         [~,sp_prop] = max(Stt); % direction of propagation
 
-        prop_dir(nc,:) = Spoints(:,sp_prop)' - tip         % propagation direction vector (ATTENTION: Not Normalized)
+        prop_dir(nc,:) = Spoints(:,sp_prop)' - tip;         % propagation direction vector (ATTENTION: Not Normalized)
     %    prop_dir = [sqrt(2)/2,sqrt(2)/2];
     %    plot stress points
 
@@ -141,7 +140,7 @@ for nc = 1:ncrack
 %             dot(edge_tangent,t)
             sIgN1 = sign(dot(edge_tangent,t));
             sIgN2 = sign(dot(edge_normal,t)*dot(edge_tangent,t));
-            prop_dir(nc,:) = sIgN1*(edge_tangent + sIgN2*tan(pi/12)*edge_normal) % Propagating with 15 degrees outwards
+            prop_dir(nc,:) = sIgN1*(edge_tangent + sIgN2*tan(pi/12)*edge_normal); % Propagating with 15 degrees outwards
 
         end
 
@@ -154,7 +153,8 @@ for nc = 1:ncrack
             plot(SMesh.nodes(:,1),SMesh.nodes(:,2),'bs')
             hold off
         end
-
+        fprintf('Propagation direction: [%.2f, %.2f]', prop_dir(nc,:));
+        
     else    % Fracture does not propagate
 
         prop_dir(nc,:) = [0, 0];   

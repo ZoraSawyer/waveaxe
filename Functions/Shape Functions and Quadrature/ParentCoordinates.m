@@ -1,6 +1,5 @@
 function [pt] = ParentCoordinates(Gpt,elemType,nodes)
-
-% Calculates local coordinates of a point from its global coordinates.
+%PARENTCOORDINATES Calculates local coordinates of a point from its global coordinates.
 
 global SMesh
 

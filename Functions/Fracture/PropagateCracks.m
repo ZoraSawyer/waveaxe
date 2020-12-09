@@ -1,11 +1,12 @@
 function PropagateCracks(dir_cr,nstep,t)
-% This function updates the crack geometry, mesh and related data
+% PROPAGATECRACKS Updates the crack geometry, mesh and related data
 % structures when the cracks propagate.
 %
 % INPUTS:
 % vel_cr = [ncr x 1] array of crack tip velocities.
 % dir_cr = [ncr x 2] array of unit vectors giving the direction of crack
 %          propagation
+
 global SMesh % Data for Solid Mesh
 global CMesh % Data for crack mesh.
 

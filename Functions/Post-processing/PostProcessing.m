@@ -1,10 +1,7 @@
 function [Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] =...
     PostProcessing(Pvar, Pvar0, Pvar_1, stdDOFs, enrDOFs, Q, Q_avg,...
     NR, t, n, save_on, dynamic_ON, dt)
-
-% POST PROCESSING:
-% Computes stress in solid
-% Computes fluid flux
+% POST PROCESSING Computes stress in solid, fluid flux
 % Checks for fracture propagation and updates fracture path if necessary
 % Writes data to output files
 

@@ -1,6 +1,5 @@
 function [S,e] = ComputeStressatPoint(X,inputfield,e)
-
-%   Computes stress at a given point, X, in the domain
+%   COMPUTESTRESSATPOINT Computes stress at a given point, X, in the domain
 %
 %   Input
 %           X : global coordinates of the point at which stress is to be

@@ -1,6 +1,5 @@
-function [D] = SolidConstitutive(elem)
-
-% Defines the solid cosntitutive model for a given element 
+function D = SolidConstitutive(elem)
+% SOLIDCONSTITUTIVE Defines the solid cosntitutive model for a given element 
 %
 %   Input
 %           elem : element

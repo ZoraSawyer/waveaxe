@@ -1,4 +1,4 @@
-function [ dof ] = NodalDOFs( node )
+function dof = NodalDOFs( node )
 global SMesh
 
 nsd      = size(SMesh.nodes,2);   % number of space DOFs

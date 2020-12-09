@@ -1,5 +1,5 @@
 function [W,Q] = DiscontL2quad(order,segment)
-% Returns quadrature points for each segment of a discontinuous element
+% DISCONTL2QUAD Returns quadrature points for each segment of a discontinuous element
 % Written by Matin Parchei Esfahani, University of Waterloo, February 2018
 
 nsegment = length(segment)-1;   % number of segments

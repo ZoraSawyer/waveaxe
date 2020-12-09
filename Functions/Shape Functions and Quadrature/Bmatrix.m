@@ -1,6 +1,5 @@
 function [B,J] = Bmatrix(xi,xI,conn,enrnodes,fI,etype,sign)
-
-% Computes FEM/XFEM spatial darivatives and the corresponding Jacobian at a
+% BMATRIX Computes FEM/XFEM spatial darivatives and the corresponding Jacobian at a
 % given point of an element
 %
 %   Input

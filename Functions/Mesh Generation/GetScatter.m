@@ -1,6 +1,4 @@
-function [ sctr ] = GetScatter( enodes )
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+function sctr = GetScatter( enodes )
 
 global SMesh
 

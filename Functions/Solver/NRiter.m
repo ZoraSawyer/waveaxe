@@ -1,8 +1,6 @@
 function [Pvar,q,NR,NRs,NRf,converged] = NRiter(Force, t, dt, ndof_s, ndof_c, fixed_dofs, Pvar0, Pvar_1, dynamic_ON)
-
-% Newton-Raphson iterative process: Solves the nonlinear coupled system of 
+%NRITER Newton-Raphson iterative process: Solves the nonlinear coupled system of 
 % equations for simulation of HF. Solves F(x)-f = 0
-
 %   Input - Force = [Ft + Fb - F_int    % solid force vectors
 %                           q       ]   % fluid flux vector
 %           t         : current time
@@ -110,11 +108,9 @@ while (iter <= max_iter) && ~converged
     NRs(iter) = norm(R(s_dof));
     NRf(iter) = norm(R(c_dof));
     NR(iter)  = norm(R);
-    if NR(iter) < res_tol; % L2 norm of the residual
-        converged = 1;
-        
-        msg = sprintf(' CONVERGED');
-        disp(msg)
+    if NR(iter) < res_tol % L2 norm of the residual
+        converged = 1;       
+        fprintf(' CONVERGED');
     else
         
         % Solve the system of equations
@@ -133,8 +129,7 @@ end
 q = - (1/dt*Kup'*(Pvar(s_dof)-Pvar0(s_dof)) + Kpp*Pvar(c_dof));     % fluid flux
 
 if iter > max_iter
-    msg = sprintf(' CONVERGENCE FAILED \n');
-    disp(msg)
+    fprintf(' CONVERGENCE FAILED \n');
     return
 end
 

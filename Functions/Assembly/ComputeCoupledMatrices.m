@@ -1,6 +1,5 @@
 function [M, Kuu, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL, S11, S12] = ComputeCoupledMatrices(d,p,d0,p0,t,update)
-
-% Computes tangential matrices required for a fully coupled HF model
+% COMPUTECOUPLEDMATRICES Computes tangential matrices required for a fully coupled HF model
 %   Input - d: nodal values of solid displacements
 %           p: nodal values of fluid pressure
 %           update: If update = 1, domain integrals will be updated. 

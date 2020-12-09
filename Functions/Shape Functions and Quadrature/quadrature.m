@@ -1,6 +1,5 @@
 function [W,Q] = Quadrature( quadorder, qt, sdim )
-
-% The function quadrature returns a n x 1 column vector W of quadrature
+%QUADRATURE The function quadrature returns a n x 1 column vector W of quadrature
 % weights and a n x dim matrix of quadrature points, where n is the
 % number of quadrature points.  The function is called as follows:
 %
@@ -163,15 +162,14 @@ end
   
     else % sdim == 3
       for i = 1:quadorder
-        for j = 1:quadorder
-          for k = 1:quadorder
-            quadpoint(n,:) = [ r1pt(i), r1pt(j), r1pt(k) ];           
-            quadweight(n) = r1wt(i)*r1wt(j)*r1wt(k); 
-            n = n+1;
+          for j = 1:quadorder
+              for k = 1:quadorder
+                  quadpoint(n,:) = [ r1pt(i), r1pt(j), r1pt(k) ];           
+                  quadweight(n) = r1wt(i)*r1wt(j)*r1wt(k); 
+                  n = n+1;
+              end
           end
-	    end
       end
-      
     end
     
     Q=quadpoint;

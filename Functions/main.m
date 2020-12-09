@@ -1,4 +1,4 @@
-clear all
+clear 
 clc
 format long
  
@@ -345,7 +345,7 @@ for np = 1:npulse
         %     [~,t,~] = Wellbore(L);          % updating wellbore pressure and time
         %     lambda  = lambda * sqrt(L0/L);     % updating lamdba (dp = lambda * dQ)
         %     dt = max(t - t0, dtmin)
-            dt = Control.Time.dtmin
+            dt = Control.Time.dtmin;
             t = t + dt;
             dynamic_ON = Control.Dynamic_ON;
             save_on = 1;

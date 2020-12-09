@@ -1,6 +1,5 @@
 function [] = Aperture(d)
-
-% Computes fracture aperture
+% APERTURE Computes fracture aperture
 %
 %   Input
 %        d : nodal displacement vector

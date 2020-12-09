@@ -1,7 +1,7 @@
-function [ tcoh, dtcohdw ] = GetCohesive(w)
-% GetCohesive : Computes cohesive traction and its derivative wrt fracture
+function [tcoh, dtcohdw] = GetCohesive(w)
+% GETCOHESIVE Computes cohesive traction and its derivative wrt fracture
 % aperture, given the fraqcture aperture at a point.
-
+%
 % Input - w : fracture aperture   
 %         tcoh : Cohesive traction
 %         dtcohdw : derivative of cohesive traction wrt fracture aperture

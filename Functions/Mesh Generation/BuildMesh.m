@@ -1,6 +1,5 @@
-function BuildMesh()
-%****************************************
-% This function builds a structure mesh
+function BuildMesh(Lx, Ly, nex, ney)
+% BUILDMESH Builds a structured mesh
 % The mesh date is written to a file in VTK form to be read by paraview.
 % Last Modified Nov 7, 2012
 % copyright Robert Gracie, 2012.
@@ -66,8 +65,6 @@ if strcmp(MeshInput,'Gmsh')
     L   = max(nodes)-min(nodes);           
     Lx  = L(1);                 % length of the model in x-directions
     Ly  = L(2);                 % length of the model in y-directions
-%     dLx = Lx/200;               % average element size in x-direction
-%     dLy = Ly/200;               % average element size in y-direction
     
     if nne == 4                 % element type
         type = 'Q4';            % 4-node quadrilateral element
@@ -91,13 +88,10 @@ elseif strcmp(MeshInput,'Built-in')
     end
     ne  = nex*ney;              % number of elements
     nn  = nx*ny;                % total number of nodes
-%     dLx = Lx/nex;               % element size in x-direction
-%     dLy = Ly/ney;               % element size in y-direction
 
     conn = zeros(ne,nne);       % element connectivity
     nodes = zeros(nn,nsd);      % nodal coordinates
     nodeconn = zeros(nn,4);     % nodal connectivity
-%     eneighbours = zeros(ne,4);  % element neighbours (share an edge)
     elem_inc = zeros(1,ne);     % indicates the material inclusion each element belongs to
 
     disp([num2str(toc),': Computing  nodal locations...']);
@@ -121,10 +115,6 @@ elseif strcmp(MeshInput,'Built-in')
                 conn(e,2)=1+ii;
                 conn(e,3)=1+ii+nx;
                 conn(e,4)=ii+nx;
-%                 eneighbours(e,1) = e-nex;
-%                 eneighbours(e,2) = e+1;
-%                 eneighbours(e,3) = e+nex;
-%                 eneighbours(e,4) = e-1;
                 e=e+1;
             end
         end
@@ -144,10 +134,6 @@ elseif strcmp(MeshInput,'Built-in')
                 conn(e,7)=1+ii+2*nx;
                 conn(e,8)=ii+nx;
                 conn(e,9)=ii+1+nx;
-%                 eneighbours(e,1) = e-nex;
-%                 eneighbours(e,2) = e+1;
-%                 eneighbours(e,3) = e+nex;
-%                 eneighbours(e,4) = e-1;
                 e=e+1;
             end
         end
@@ -199,7 +185,7 @@ end
 
 
 % defining material inclusions
-if Domain.Inclusion_ON;
+if Domain.Inclusion_ON
     for n = 1:nn
         for incn = 1:length(Domain.inclusion)   % loop on inclusions
             R = Domain.inclusion(incn).radius;  % radius of the inclusion
@@ -443,24 +429,6 @@ if Domain.Wellbore_ON
         WBnodes(dWB <= Domain.WB(cWB).radius*1.01) = cWB;
    end
 end
-
-
-% Update Level Set Values to reflect the new tip position
-% xtip = nodes_cr(tip_nodes,:);
-% e = EnrElements(1);
-% 
-% enodes = conn(e,:);
-% for n=1:nne
-%     xI = nodes(enodes(n),:);
-%     r = xI-xtip;
-%     gI(1,n) = r*tangent;
-%     fI(1,n) = r*normal;
-% end
-% eLS(e,:) = [gI,fI];
-
-% if ENRICH_ON ~= 1
-%     EnrElements = [];
-% end
 
 SMesh.conn        = conn;
 SMesh.nodes       = nodes;

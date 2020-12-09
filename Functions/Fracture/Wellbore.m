@@ -1,7 +1,7 @@
 function [pw,t,Q] = Wellbore(var,mode)
-% Returns wellbore pressure, pw, at length L
+% WELLBORE Returns wellbore pressure, pw, at length L
 
-global Material Control Domain CMesh 
+global Material Control
 if nargin == 1
     mode = 'length';
 end

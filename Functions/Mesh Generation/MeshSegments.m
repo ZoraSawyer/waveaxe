@@ -1,5 +1,5 @@
 function [sx,sy,nex,ney] = MeshSegments(meshtype, etype, Lx, Ly, nex, ney, s0x, s0y, rx, ry)
-% Returns mesh segments for a Q4 structured mesh
+% MESHSEGMENTS Returns mesh segments for a Q4 structured mesh
 
 % Output:
 %   Sx  : mesh segments in x-direction

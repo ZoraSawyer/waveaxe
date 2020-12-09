@@ -1,6 +1,5 @@
 function [Q, Q_avg, Vcr, Vinj] = ComputeFlowrateVolume(t, dt, Q_avg_old, Vinj_old, Qinj)
-
-% Computes rate of change in fracture volume
+% COMPUTEFLOWRATEVOLUME Computes rate of change in fracture volume
 %
 % Input
 %       t         : time

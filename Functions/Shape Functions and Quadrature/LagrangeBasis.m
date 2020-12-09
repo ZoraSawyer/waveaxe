@@ -1,6 +1,5 @@
-function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
-  
-% returns the lagrange interpolant basis and its gradients w.r.t the
+function [Nv,dNdxi]=LagrangeBasis(type,coord,dim) 
+%LAGRANGEBASIS returns the lagrange interpolant basis and its gradients w.r.t the
 % parent coordinate system.
 %
 %         [N(xi),dNdxi(xi)]=LagrangeBasis(type-order,coord,dim)
@@ -77,16 +76,7 @@ function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
       N=[1-xi-eta;xi;eta];
       dNdxi=[-1,-1;1,0;0,1];
     end
-    
-   case 'T3'
-    if size(coord,2) < 2
-      disp('Error two coordinates needed for the T3fs element')
-    else
-      xi=coord(1); eta=coord(2);
-      N=[1-xi-eta;xi;eta];
-      dNdxi=[-1,-1;1,0;0,1];
-    end
-        
+            
    case 'T4'
     %%%%%%%%%% T4 FOUR NODE TRIANGULAR CUBIC BUBBLE ELEMENT %%%%%%%%%%%% 
     %   

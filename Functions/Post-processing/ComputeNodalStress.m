@@ -1,6 +1,5 @@
 function [ S ] = ComputeNodalStress( d )
-
-% Returns a smooth matrix of nodal stresses
+% COMPUTENODALSTRESS Returns a smooth matrix of nodal stresses
 %
 %   Input
 %           d : solid displacement vector
