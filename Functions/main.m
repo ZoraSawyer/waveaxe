@@ -328,7 +328,7 @@ for np = 1:npulse
 
         %% Post processing
         [Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] = PostProcessing(Pvar, Pvar0, Pvar_1, ...
-            stdDOFs, enrDOFs, Vcr, Vinj, NR, t, nt, save_on, dynamic_ON, dt);
+            stdDOFs, enrDOFs, Vcr, Vinj, NR, t, nt, save_on, dynamic_ON, dt, SMesh, CMesh, Domain, Control);
 
         % move on to the next time step if fracture stopped propagating
         if ~prop
