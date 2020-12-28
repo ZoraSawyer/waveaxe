@@ -113,7 +113,7 @@ if update     % Domain integrals must be updated
         Kuu_e    = zeros(e_ndof,e_ndof);    % element stiffness matrix
         M_e      = zeros(e_ndof,e_ndof);    % element mass matrix
 
-        D = SolidConstitutive(e);           % Solid elasticity matrix
+        D = SolidConstitutive(e, Material, SMesh, Domain);           % Solid elasticity matrix
        
         for q = 1:nq    % loop on quadrature points
 

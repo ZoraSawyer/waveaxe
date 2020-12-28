@@ -34,7 +34,7 @@ for e = 1:ne                        % loop on elements
         crnum = 1;                  % LS of the first crack is passed to Bmatrix
     end
     
-    D = SolidConstitutive(e);       % gives stress strain relation based on the constitutive law
+    D = SolidConstitutive(e, Material, SMesh, Domain);       % gives stress strain relation based on the constitutive law
     
     switch nne
         case 4                      % Q4 element
