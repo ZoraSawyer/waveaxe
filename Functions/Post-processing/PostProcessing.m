@@ -67,7 +67,7 @@ if norm(prop_dir) % fracture propagation
     Pvar0_old  = Pvar0;
     Pvar_1_old = Pvar_1;
     
-    PropagateCracks(prop_dir,n,t)       % Updating levelsets and enriched DOFs
+    PropagateCracks(prop_dir, n, t, SMesh, CMesh, Control.OutPath)       % Updating levelsets and enriched DOFs
                                            % based on the new fracture configuration
 
     enrDOFs = nsd*length(SMesh.EnrNodes);  % updating number of enriched DOFs
