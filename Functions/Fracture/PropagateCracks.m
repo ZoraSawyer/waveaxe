@@ -30,7 +30,6 @@ edges = [1,2; 2,3; 3,4; 4,1]; % local Q4 elem connectivity
 
 ntips = size(dir_cr,1);
 
-
 for i = 1:ntips
     if norm(dir_cr(i,:))
         eID1 = CMesh(i).tip_smesh_e; %enriched element currently containing tip

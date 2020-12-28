@@ -76,26 +76,7 @@ while (iter <= max_iter) && ~converged
     % Jacobian of the fully coupled system
     Kt = [dynamic_ON*(1/dt^2)*M + Kuu + Kcoh,     -Kup;
                              1/dt*Kup' + Kpu,      Kpp + Kpp_L];
-            
-    if strcmp(Control.split, 'DD')
-        % Jacobian of the drained split 
-        Kt(s_dof,c_dof) = 0;
-        Kt(c_dof,s_dof) = 0; % optional
-        
-    elseif strcmp(Control.split, 'UD')
-        % Jacobian of the drained split 
-        beta = Control.APM.b * Control.APM.M;
-        S = Spp \ Spu;
-        
-        Kt(s_dof,s_dof) = Kt(s_dof,s_dof) + beta*Kup*S;
-        Kt(s_dof,c_dof) = 0;
-%         Kt(c_dof,s_dof) = 0;
-        
-%         p_UD = Pvar0(c_dof) - beta*S*(Pvar(s_dof) - Pvar0(s_dof));
-%         Fp   = Kup * p_UD;
-        
-    end
-               
+                           
     % Compute residuals
     R(s_dof) = dynamic_ON*1/dt^2*M*(Pvar(s_dof) - 2*Pvar0(s_dof) + Pvar_1(s_dof)) + ...
         Kuu*Pvar(s_dof) + Fcoh - Fp - Force(s_dof);                                         % Ru
@@ -106,6 +87,7 @@ while (iter <= max_iter) && ~converged
     NRs(iter) = norm(R(s_dof));
     NRf(iter) = norm(R(c_dof));
     NR(iter)  = norm(R);
+    
     if NR(iter) < res_tol % L2 norm of the residual
         converged = 1;       
         fprintf(' CONVERGED');

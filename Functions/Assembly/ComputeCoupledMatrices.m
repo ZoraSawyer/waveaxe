@@ -1,4 +1,4 @@
-function [M, Kuu, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL, S11, S12] = ComputeCoupledMatrices(d,p,d0,p0,t,update)
+function [M, Kuu, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL] = ComputeCoupledMatrices(d,p,d0,p0,t,update)
 % COMPUTECOUPLEDMATRICES Computes tangential matrices required for a fully coupled HF model
 %   Input - d: nodal values of solid displacements
 %           p: nodal values of fluid pressure
@@ -65,7 +65,6 @@ phi   = Material.solid.porosity;                                            % po
 ct    = Material.solid.compressibility + Material.fluid.compressibility;    % total compressibility (ct = cf + cs)                
 
 p_hyd = Domain.GravityAcceleration * Domain.Depth * Material.fluid.rho;     % Hydro-static pressure
-
 
 % DOMAIN INTEGRALS
 if update     % Domain integrals must be updated
@@ -154,8 +153,6 @@ else    % domain integrals will not be updated
     M   = 0;
 end
 
-
-
 % BOUNDARY (CRACK) INTEGRALS
 % defining size of vectors
 nne_c     = size(CMesh(1).conn,2);                        % number of nodes per element (crack)
@@ -174,11 +171,6 @@ Fcoh    = zeros(vec_size5,1);
 Fp      = zeros(vec_size5,1);
 Kpp_L   = zeros(vec_size2,1);
 FL      = zeros(vec_size6,1);
-
-if strcmp(Control.split,'UD')   % Undrained split
-    S11 = zeros(vec_size2,1);
-    S12 = zeros(vec_size3,1);
-end
 
 % row vectors of the sparse matrices
 row_pp   = zeros(vec_size2,1);
@@ -245,11 +237,6 @@ for nc = 1:ncrack
         Kpp_L_e  = zeros(e_ndof_c,e_ndof_c);
         FL_e     = zeros(e_ndof_c,1);
         
-        if strcmp(Control.split, 'UD')          % Undrained split
-            S11_e = zeros(e_ndof_c,e_ndof_c);
-            S12_e = zeros(e_ndof_c,e_ndof_s);
-        end
-
         for q = 1:nq
 
             xi = Q(q,:);
@@ -270,16 +257,7 @@ for nc = 1:ncrack
             [N_neg,~] = Nmatrix(xi,S_nodes,S_enodes,SMesh.EnrType(S_enodes),...
                 SMesh.eLS(S_elem,fLSrange,nc),etype,-1);    % Shape functions on the negative side of the crack
 
-            Ndis = N_pos - N_neg;   % Jump!
-
-            % Compute derivatives of shape functions on fracture faces
-            if strcmp(Control.split,'UD')
-                [B_pos,~] = Bmatrix(xi,S_nodes,S_enodes,SMesh.EnrType(S_enodes),...
-                    SMesh.eLS(S_elem,fLSrange,nc),etype,1);     % Shape functions on the positive side of the crack
-                [B_neg,~] = Bmatrix(xi,S_nodes,S_enodes,SMesh.EnrType(S_enodes),...
-                    SMesh.eLS(S_elem,fLSrange,nc),etype,-1);    % Shape functions on the negative side of the crack
-            end
-            
+            Ndis = N_pos - N_neg;   % Jump!            
 
             % Compute aperture, Dw, dDw/dw, and dt_coh/dw
             w = n_cr'*Ndis*d(S_sctr);           % fracture aperture at GP
@@ -289,14 +267,7 @@ for nc = 1:ncrack
             dDwdw = w^2/mu/4;                   % dDw/dw
 
             % Compute pressure gradient
-            if strcmp(Control.split,'UD')
-                m = [n_cr(1)^2, n_cr(2)^2, n_cr(1)*n_cr(2)];
-                beta = Control.APM.b * Control.APM.M;
-                % undrained pressure at GP
-                p_gp = Np*p0(C_sctr) - beta*m*(B_pos - B_neg)*(d(S_sctr)-d0(S_sctr));
-            else
-                p_gp = Np*p(C_sctr);            % pressure at quadrature point
-            end
+            p_gp = Np*p(C_sctr);            % pressure at quadrature point
             
             dpds = Bp*p(C_sctr);                % pressure gradient at quadrature point
             
@@ -305,26 +276,17 @@ for nc = 1:ncrack
                 C_leakoff = 2*sqrt(k*phi*ct/(mu*pi))/sqrt(t-t0);     % Carter leak-off coefficient
             else
                 C_leakoff = 0;
-            end
-            
+            end          
             
             % Compute Kpp
             Kpp_e = Kpp_e + Bp' * Dw * Bp * Wi * det(Je);
             
-            if strcmp(Control.split, 'UD')      % Undrained split
-                S11_e = S11_e + Np' * Np * Wi *det(Je);
-            end
-
             % Compute Kup
             Kup_e = Kup_e + Ndis' * n_cr * Np * Wi * det(Je);
 
             % Compute Kpu
             Kpu_e = Kpu_e + Bp' * dpds * dDwdw * n_cr' * Ndis * Wi * det(Je);
-            
-            if strcmp(Control.split, 'UD')      % Undrained split
-                S12_e = S12_e + Np' * m * (B_pos - B_neg) * Wi * det(Je);
-            end
-            
+                        
             % Compute Kcoh
             Kcoh_e = Kcoh_e + Ndis' * n_cr * dtcohdw * n_cr' * Ndis * Wi * det(Je);
 
@@ -356,13 +318,6 @@ for nc = 1:ncrack
         Kpp_L_e = reshape(Kpp_L_e,[numel(Kpp_L_e),1]);
         Kpp_L(count_pp-numel(Kpp_L_e):count_pp-1) = Kpp_L_e;
         
-        % Compute Spp
-        if strcmp(Control.split, 'UD')          % Undrained split
-            S11_e = reshape(S11_e,[numel(S11_e),1]);
-            S11(count_pp-numel(S11_e):count_pp-1) = S11_e;
-        end
-
-
         % Compute Kup
         for i = 1:e_ndof_c
             col_up(count_up:count_up+e_ndof_s-1) = C_sctr(i)*ones(e_ndof_s,1);
@@ -372,7 +327,6 @@ for nc = 1:ncrack
 
         Kup_e = reshape(Kup_e,[numel(Kup_e),1]);
         Kup(count_up-numel(Kup_e):count_up-1) = Kup_e;
-
 
         % Compute Kpu
         for i = 1:e_ndof_s
@@ -384,13 +338,6 @@ for nc = 1:ncrack
         Kpu_e = reshape(Kpu_e,[numel(Kpu_e),1]);
         Kpu(count_pu-numel(Kpu_e):count_pu-1) = Kpu_e;
 
-        % Compute Spu
-        if strcmp(Control.split, 'UD')          % Undrained split
-            S12_e = reshape(S12_e,[numel(S12_e),1]);
-            S12(count_pu-numel(S12_e):count_pu-1) = S12_e;
-        end
-
-
         % Compute Kcoh
         for i = 1:e_ndof_s
             col_coh(count_coh:count_coh+e_ndof_s-1) = S_sctr(i)*ones(e_ndof_s,1);
@@ -400,7 +347,6 @@ for nc = 1:ncrack
 
         Kcoh_e = reshape(Kcoh_e,[numel(Kcoh_e),1]);
         Kcoh(count_coh-numel(Kcoh_e):count_coh-1) = Kcoh_e;
-
 
         % Compute Fcoh and Fp
         row_Fcr(count_Fcr:count_Fcr+e_ndof_s-1) = S_sctr;
@@ -429,14 +375,6 @@ Fcoh    = sparse(row_Fcr, ones(length(row_Fcr),1), Fcoh, ndof_domain, 1);
 Fp      = sparse(row_Fcr, ones(length(row_Fcr),1), Fp, ndof_domain, 1);
 Kpp_L   = sparse(row_pp, col_pp, Kpp_L, ndof_crack, ndof_crack);
 FL      = sparse(row_FL, ones(length(row_FL),1), FL, ndof_crack, 1);
-
-if strcmp(Control.split, 'UD')          % Undrained split
-    S12 = sparse(row_pu, col_pu, S12, ndof_crack, ndof_domain);
-    S11 = sparse(row_pp, col_pp, S11, ndof_crack, ndof_crack);
-else
-    S12 = [];
-    S11 = [];
-end
 
 end
 

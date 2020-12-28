@@ -189,11 +189,5 @@ global Domain Material Control OutPath InPath
 
     Control.MagCoef = 1;                                                % Magnification coefficient                                    
 
-    Control.split = 'FC';                                               % split type, 'DD': Drained split
-                                                                        %             'UD': Undrained split
-                                                                        %             'SS': Fixed stress split
-    % Control.APM.b = 1;                                                  % Biot coefficient of the APM
-    % Control.APM.M = .01*16E9;                                           % Biot modulus of the APM                                                                    
-
     Control.Postprocessing.OutputFreq = 10;                              % output frequency; frequency of saving output files
     Control.Postprocessing.PlotFreq   = 10;                              % frequency of fracture plots 
