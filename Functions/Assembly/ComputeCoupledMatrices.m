@@ -1,4 +1,5 @@
-function [M, Kuu, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL, S11, S12] = ComputeCoupledMatrices(d,p,d0,p0,t,update)
+function [M, Kuu, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL, S11, S12] = ...
+    ComputeCoupledMatrices(d, p, d0, p0, t, update, SMesh, CMesh, Material, Control, Domain)
 % COMPUTECOUPLEDMATRICES Computes tangential matrices required for a fully coupled HF model
 %   Input - d: nodal values of solid displacements
 %           p: nodal values of fluid pressure
@@ -17,8 +18,6 @@ function [M, Kuu, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL, S11, S12] = ComputeC
 
 % Written by Matin Parchei Esfahani, May 2017, University of Waterloo
 % Revised, November 2018
-
-global SMesh CMesh Material Control Domain
 
 %in situ stress field
 Sx  = Domain.InsituStress.Sx;   % in situ stress in x-direction
