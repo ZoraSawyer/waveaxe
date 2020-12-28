@@ -35,7 +35,7 @@ nsd = size(SMesh.nodes,2);                  % number of space dimensions
 % ========================= COMPUTE SOLID STRESS ==========================
 % Compute Nodal Stresses
 disp([num2str(toc),': Computing stress in solid'])
-[S] = ComputeNodalStress(Pvar(1:s_dof));   % Compute stress at nodes
+S = ComputeNodalStress(Pvar(1:s_dof));   % Compute stress at nodes
 
 % in situ stress
 Sx  = Domain.InsituStress.Sx;   % in situ stress in x-direction

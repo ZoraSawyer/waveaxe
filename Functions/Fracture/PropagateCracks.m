@@ -47,7 +47,6 @@ for i = 1:ntips
             etp = 'Q4';
         end
         [~,dNdxi] = LagrangeBasis(etp,[0,0],1); % evaluated shape functions at zi
-    %     [~,dNdxi]=Q4_LagrangeBasis([0,0]); 
 
         dxdz = dNdxi'*xI;
         dNdx = dxdz\dNdxi';%(dNdxi*inv(dxdz))'; % Derivative of the shape functions wrt glob coord sys
@@ -57,11 +56,6 @@ for i = 1:ntips
            disp('ERROR in propagatecrack - propagation direction is +/- 90 degree from previous direction');
            stop
         end
-
-
-
-
-
 
         % finding the element edge containing the tip and the neighbour element
         eID2 = 0; % element neighbour to eID1 share edge with the tip.
@@ -86,17 +80,6 @@ for i = 1:ntips
                         eID2 = SMesh.eneighbours(eID1,ee); % neighbouring element ID
                     end
                 end
-
-
-
-    %             ee
-    %             g1
-    %             g2
-    %             if ee == 1 || ee == 3
-    %                 TEdge_switch = 1;       % a switch indicating whether tip edge is horizontal or 
-    %             elseif ee == 2 || ee == 4   % vertical to prevent later propagation along the element edge
-    %                 TEdge_switch = 2;
-    %             end
             end
         end
         if eID2 <=0
@@ -104,10 +87,6 @@ for i = 1:ntips
 
             stop;
         end
-
-
-
-
 
         % define first approximation of new level sets for eID2
         % in order to find the edge of eID2 which will contain the tip
