@@ -46,7 +46,7 @@ for nc = 1:ncrack
     % Computing stress ahead of the fracture tip
     tipSpoint = tip + .001*t';    % compute stress at this point
 
-    [stress, sp_elem] = ComputeStressatPoint(tipSpoint,inputfield);   % stress tensor at stress point
+    [stress, sp_elem] = ComputeStressatPoint(tipSpoint, inputfield, SMesh);   % stress tensor at stress point
 
     % Calculate principal stresses at the tip
     % stress
@@ -92,7 +92,7 @@ for nc = 1:ncrack
             S = n(2)*sin(theta(npt)) - n(1)*cos(theta(npt));    % sin of the rotation angle
             C = n(2)*cos(theta(npt)) + n(1)*sin(theta(npt));    % cos of the rotation angle
 
-            [stress,~] = ComputeStressatPoint(Spoints(:,npt)',inputfield);   % stress tensor at stress point and 
+            [stress,~] = ComputeStressatPoint(Spoints(:,npt)', inputfield, SMesh);   % stress tensor at stress point and 
                                                                                 % the corresponding element
             Stt(npt) = stress(1)*S^2 + stress(2)*C^2 - 2*stress(3)*C*S;         % hoop stress at stress point
             %Srt = (stress(2)-stress(1))*S*C + stress(3)*(C^2-S^2);             % shear stress at stress points

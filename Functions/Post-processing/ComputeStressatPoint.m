@@ -1,4 +1,4 @@
-function [S,e] = ComputeStressatPoint(X,inputfield,e)
+function [S,e] = ComputeStressatPoint(X, inputfield, e, SMesh)
 %   COMPUTESTRESSATPOINT Computes stress at a given point, X, in the domain
 %
 %   Input
@@ -20,9 +20,6 @@ function [S,e] = ComputeStressatPoint(X,inputfield,e)
 
 % Written by Matin Parchei Esfahani, University of Waterloo, Sep. 2015
 % last modified Oct. 2017 (Version 2)
-
-
-global SMesh
 
 if nargin == 2                              % if element containing point X is not known
     e = FindElement(X);                     % find element containing point X
