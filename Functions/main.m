@@ -258,7 +258,9 @@ for np = 1:npulse
                 Pvar0(pressdofs) = pw;
 
             % Newton-Raphson iteration    
-                [Pvar,q,NR,NRs,NRf,converged] = NRiter(Force, t, dt, s_dof, f_dof, fixed_dofs, Pvar0, Pvar_1, dynamic_ON);
+                [Pvar,q,NR,NRs,NRf,converged] = ...
+                    NRiter(Force, t, dt, s_dof, f_dof, fixed_dofs, ...
+                        Pvar0, Pvar_1, dynamic_ON, Control);
                 if ~converged   % terminates the program if convergence is failed
                     return
                 end
