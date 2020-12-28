@@ -1,4 +1,4 @@
-function BuildMesh(Lx, Ly, nex, ney)
+function [SMesh, CMesh] = BuildMesh(Mesh, Domain, Control)
 % BUILDMESH Builds a structured mesh
 % The mesh date is written to a file in VTK form to be read by paraview.
 % Last Modified Nov 7, 2012
@@ -15,21 +15,16 @@ function BuildMesh(Lx, Ly, nex, ney)
 %               elements that share an edges with e.  
 % TipElements = [ncr x 1] list of solid elements containing the crack tip
 
-clear;
-global Domain SMesh CMesh
-global ConfigFileName
-global OutPath
-
 disp('');
 disp('** Running Mesh Generator **');
 tic;
 disp([num2str(toc),': Reading config file...']);
-run(ConfigFileName);
 
 % MESH GENERATION
-if strcmp(MeshInput,'Gmsh')
+if strcmp(Mesh.Input, 'Gmsh')
     
-    [nodes,conn,left_edge,right_edge,top_edge,bot_edge] = LoadMesh(MeshFileName, nsd, Control.InPath);
+    [nodes, conn, left_edge, right_edge, top_edge, bot_edge] = ...
+              LoadMesh(Mesh.FileName, Mesh.nsd, Control.InPath);
     
     nn  = size(nodes,1);        % number of nodes
     ne  = size(conn,1);         % number of elements
@@ -37,8 +32,8 @@ if strcmp(MeshInput,'Gmsh')
     nex = [];
     ney = [];
     
-    nodeconn = zeros(nn,4);     % nodal connectivity
-    elem_inc = zeros(1,ne);     % indicates the material inclusion each element belongs to
+    nodeconn = zeros(nn, 4);     % nodal connectivity
+    elem_inc = zeros(1, ne);     % indicates the material inclusion each element belongs to
     
     % modify mesh to actual wellbore size.
     Lold = Domain.WB(1).radiusmesh; % radius of well in original mesh
@@ -59,7 +54,7 @@ if strcmp(MeshInput,'Gmsh')
         end
     end
     
-    L   = max(nodes)-min(nodes);           
+    L   = max(nodes) - min(nodes);           
     Lx  = L(1);                 % length of the model in x-directions
     Ly  = L(2);                 % length of the model in y-directions
     
@@ -69,9 +64,18 @@ if strcmp(MeshInput,'Gmsh')
         type = 'Q9';            % 9-node quadrilateral element
     end
     
-elseif strcmp(MeshInput,'Built-in')
+elseif strcmp(Mesh.Input,'Built-in')
+    Lx = Domain.Lx;
+    Ly = Domain.Ly;
+    nex = Mesh.nex;
+    ney = Mesh.ney;
+    s0x = Mesh.s0x;
+    s0y = Mesh.s0y;
+    rx = Mesh.rx;
+    ry = Mesh.ry;
 
-    [sx,sy,nex,ney] = MeshSegments(meshtype, elemtype, Lx, Ly, nex, ney, s0x, s0y, rx, ry);
+    [sx, sy, nex, ney] = MeshSegments(Mesh.type, Mesh.elemtype, ...
+          Lx, Ly, nex, ney, s0x, s0y, rx, ry);
 
     switch elemtype
         case 'Q4'
@@ -86,18 +90,18 @@ elseif strcmp(MeshInput,'Built-in')
     ne  = nex*ney;              % number of elements
     nn  = nx*ny;                % total number of nodes
 
-    conn = zeros(ne,nne);       % element connectivity
-    nodes = zeros(nn,nsd);      % nodal coordinates
-    nodeconn = zeros(nn,4);     % nodal connectivity
-    elem_inc = zeros(1,ne);     % indicates the material inclusion each element belongs to
+    conn = zeros(ne, nne);       % element connectivity
+    nodes = zeros(nn, nsd);      % nodal coordinates
+    nodeconn = zeros(nn, 4);     % nodal connectivity
+    elem_inc = zeros(1, ne);     % indicates the material inclusion each element belongs to
 
     disp([num2str(toc),': Computing  nodal locations...']);
 
     c=1;
     for i=1:ny
         for j=1:nx 
-            nodes(c,1)=sx(j);
-            nodes(c,2)=sy(i);
+            nodes(c,1) = sx(j);
+            nodes(c,2) = sy(i);
             c=c+1;
         end    
     end
@@ -220,8 +224,8 @@ if Domain.Fracture_ON  % Model with fracture
         normal  = crack_surface_normal(:,nc);
         tangent = crack_front_normal(:,nc);
     
-        xtip0 = [x0(nc),y0(nc)];    % location of the tip
-        xtips = [xs(nc),ys(nc)];    % location of the start point
+        xtip0 = [Domain.x0(nc), Domain.y0(nc)];    % location of the tip
+        xtips = [Domain.xs(nc), Domain.ys(nc)];    % location of the start point
         
         fI  = zeros(1,4);   % normal LS
         gI  = zeros(1,4);   % tangent LS
@@ -450,11 +454,11 @@ SMesh.left_edge   = left_edge;
 SMesh.right_edge  = right_edge;
 SMesh.top_edge    = top_edge;
 SMesh.bot_edge    = bot_edge;
-SMesh.MeshForm    = MeshForm;
+SMesh.Form        = Mesh.Form;
 SMesh.WBnodes     = WBnodes;
 
 % Write initial mesh to files
-filename = [OutPath 'mesh.vtk.0'];
+filename = [Control.OutPath 'mesh.vtk.0'];
 description = 'Initial Solid Mesh Data';
 scalardata(1).name = 'ID';
 scalardata(1).data = 1:nn;
@@ -477,7 +481,7 @@ WriteMesh2VTK(filename,description, SMesh.nodes,SMesh.conn,scalardata,cell_data)
 
 for nc = 1:ncrack
     filestring = ['crack', num2str(nc), '.vtk.0'];
-    filename = [OutPath filestring];
+    filename = [Control.OutPath filestring];
     description = 'Initial Crack Mesh Data';
     S = struct('name',{},'data',{});
     S(1).name = 'ID';

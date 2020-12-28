@@ -1,6 +1,11 @@
 clear 
 clc
 format long
+disp(' X-FEM HYDRAULIC FRACTURE SIMULATOR ')
+tic
+
+%% User input
+    ConfigFileName = 'ConfigFile';
  
 %% Add directories to search path
     cur_dir = pwd;
@@ -10,15 +15,15 @@ format long
     addpath(genpath(func_dir));
     addpath(genpath(config_dir));
 
+%% Import config file
+    [SMesh, Domain, Material, Control] = feval(ConfigFileName);
+
 %% Build mesh
-    disp(' X-FEM HYDRAULIC FRACTURE SIMULATOR ')
-    tic
-
     disp([num2str(toc),': Loading Mesh and Config file...']);
-    ConfigFileName = 'ConfigFile';
-    BuildMesh
+    
+    [SMesh, CMesh] = BuildMesh(SMesh, Domain, Control);
 
-    nsd = size(SMesh.nodes,2);                          % number of spacedimensions
+    nsd = size(SMesh.nodes,2);              % number of space dimensions
     ncrack = size(CMesh,2);                 % number of cracks
 
 %% Define node sets and DOF sets
@@ -156,7 +161,6 @@ for np = 1:npulse
             for n = 1:ncrack
                 CMesh(n).t0 = t*ones(1,length(CMesh(n).t0));
             end
-        global SMesh CMesh Material Domain Control ConfigFileName OutPath
         end
         
         save_on = 1;                            % indicates when to save variables
