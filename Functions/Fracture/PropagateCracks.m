@@ -1,4 +1,4 @@
-function PropagateCracks(dir_cr, nstep, t, SMesh, CMesh, OutPath)
+function [SMesh, CMesh] = PropagateCracks(dir_cr, nstep, t, SMesh, CMesh, OutPath)
 % PROPAGATECRACKS Updates the crack geometry, mesh and related data
 % structures when the cracks propagate.
 %
