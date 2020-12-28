@@ -22,7 +22,7 @@ function [S,e] = ComputeStressatPoint(X, inputfield, e, SMesh)
 % last modified Oct. 2017 (Version 2)
 
 if nargin == 2                              % if element containing point X is not known
-    e = FindElement(X);                     % find element containing point X
+    e = FindElement(X, SMesh);                     % find element containing point X
 end
 
 enodes = SMesh.conn(e,:);                   % element connectivity
