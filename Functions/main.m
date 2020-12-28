@@ -363,7 +363,7 @@ for np = 1:npulse
                 L0  = L;
                 tip = CMesh(1).tip_nodes;          % tip node of the crack
                 L   = CMesh(1).CrackLength(tip);   % fracture length
-                [~,t,~] = Wellbore(L);          % updating wellbore pressure and time
+                [~,t,~] = Wellbore(L, Material, Control);          % updating wellbore pressure and time
                 lambda  = lambda * sqrt(L0/L);     % updating lamdba (dp = lambda * dQ)
             end
 
