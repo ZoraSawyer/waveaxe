@@ -110,16 +110,6 @@ format long
     p_hyd = Domain.GravityAcceleration * Domain.Depth * Material.fluid.rho; % Hydro-static pressure
 
     for n = 1:ncrack   
-        if Control.Wellbore.rate_control
-            ncr = CMesh(n).surface_normal(1,:);
-            R   = [ ncr(2), ncr(1);
-                   -ncr(1), ncr(2)];            % Transformation matrix
-            S_theta = R'*S0*R;                  % Transforming the in situ stress to the fracture coordinates
-            Sn = S_theta(2,2);                  % component of stress normal to the fracture
-            p(count+1:count+fdof(n)) = -Sn;     % initial pressure in the n-th fracture
-            Sn_max = min(Sn_max,Sn);            % max normal stress (min function is due to negative sign of in situ stresses) 
-        end
-
         p(count+1:count+fdof(n)) = p_hyd;     % initial pressure in the n-th fracture
         count = count + fdof(n);
 
@@ -178,32 +168,13 @@ for np = 1:npulse
         Lt   = zeros(length(t:dt:tend),ncrack);
         tn   = zeros(length(t:dt:tend),1);
 
-        if Control.Wellbore.rate_control
-            mu  = Material.fluid.mu;                         % fluid viscosity [Pa.s]
-            G   = E/(1+nu)/2;                                % shear modulus [Pa]
-            lambda = .25*.96*( 2*mu*G^3 / (L^2*(1-nu)^3) )^(1/4) * Q_inj^(-3/4);    % initial value of lambda (dp = lambda * dQ)
-
-            Q_avg_old  = zeros(ncrack,1);           % average flowrate
-            Vinj_old   = zeros(ncrack,1);           % total injected volume
-            q_tip_old  = 0;                         % initial fluid flux at tip
-            qw         = -Q_inj;                    % injection rate at wellbore
-            
-            q0t  = zeros(length(t:dt:tend),1);
-            qnt  = zeros(length(t:dt:tend),1);
-            mass = zeros(length(t:dt:tend),1);
-        end
-
     % Run through timesteps
     while t <= tend
 
+        disp([num2str(toc),': SOLVING THE SYSTEM OF EQUATIONS'])
         % Initialize variables for timestep nt
             % updating force (NBC)
             Force = zeros(s_dof + f_dof,1);
-
-            if Control.Wellbore.rate_control
-                WB_node = CMesh(1).start_nodes;         % Wellbore node of the crack mesh
-                Force(s_dof+WB_node) = qw;              % injection rate at wellbore
-            end
 
             % updating fixed DoFs (EBC)
             count     = 0;
@@ -225,106 +196,34 @@ for np = 1:npulse
             converged_Q = 0;                        % flow rate convergence indicator
             max_iter_Q  = 100;                      % maximum number of iterations for flow rate adjustment
 
-            if Control.Wellbore.rate_control
-                tol         = 1e-2;                     % tolerance of error for lambda
-                NL          = zeros(max_iter_Q,1);      % stores norm of the error
-                minerror    = .2;                       % minimum allowable relative change in Qerror for each iteration
-                C_dn        = .6;                       % correction coefficient to decrease lambda (C_dn < 1)
-                C_up        = 1.5;                      % correction coefficient to increase lambda (C_up > 1)
-                Qerror_old  = 1;                        % initial value of error
-            end 
 
-        disp([num2str(toc),': SOLVING THE SYSTEM OF EQUATIONS'])
-        % Solve for inlet pressure with mass conservation
-        while ~converged_Q && iter_count <= max_iter_Q 
+        % Update WB pressure
+            [dpw,~,~] = Wellbore(t,'time');      % wellbore pressure at time t
 
-            % Update WB pressure
-                [dpw,~,~] = Wellbore(t,'time');      % wellbore pressure at time t
+            pw = p_hyd + dpw;                       % update wellbore pressure
 
-                if Control.Wellbore.rate_control
-                    pw = -Sn_max + dpw;                     % update wellbore pressure
-                else
-                    pw = p_hyd + dpw;                       % update wellbore pressure
-                end
+            Cwb  = 2*pi*Domain.WB(1).radius / length(WBnodes);
 
-                Cwb  = 2*pi*Domain.WB(1).radius / length(WBnodes);
-
-                % pressure on well bore
-                for i = 1:length(WBnodes)
-                    fwb = Cwb * (pw*eye(nsd) + S0) * n_WB(i,:)';
-                    Force(WB_x(i)) = fwb(1);
-                    Force(WB_y(i)) = fwb(2);
-                end
-                Pvar0(pressdofs) = pw;
-
-            % Newton-Raphson iteration    
-                [Pvar,q,NR,NRs,NRf,converged] = NRiter(Force, t, dt, s_dof, f_dof, fixed_dofs, Pvar0, Pvar_1, dynamic_ON);
-                if ~converged   % terminates the program if convergence is failed
-                    return
-                end
-
-            disp([num2str(toc),': Computing fracture aperture'])
-            % Compute fracture aperture
-            Aperture(Pvar(1:s_dof));
-
-            if Control.Wellbore.rate_control
-
-                disp([num2str(toc),': Computing flow rate'])
-                % Compute flow rate
-                [Q, Q_avg,Vcr, Vinj] = ComputeFlowrateVolume(t, dt, ...
-                                        Q_avg_old, Vinj_old, Q_inj);
-
-                dQ = Q_inj - Q;         % compute error 
-                Qerror = norm(dQ/Q_inj);
-                tip_node = CMesh.tip_nodes; 
-                dm = qw + Q + q(tip_node);
-
-                if Qerror < tol
-                    converged_Q = 1; 
-                    NL(iter_count+1) = Qerror;
-                    disp([num2str(toc),': CONSERVATION OF FLUID MASS:CONVERGED'])
-                else
-                    iter_count = iter_count + 1; 
-                    NL(iter_count) = Qerror;
-                                
-                    disp([num2str(toc),': Adjusting wellbore injection rate: Attempt ', num2str(iter_count)])
-                    
-                    dQerror = (Qerror_old - Qerror) / Qerror;
-                    Qerror_old =Qerror;
-                    
-                    if dQerror < 0
-                        lambda = lambda * C_dn;     % decrease lambda
-                        disp([num2str(toc),': Coefficient decreased to maintain convergence: Lambda = ', 
-                            num2str(lambda)]);
-                    elseif dQerror < minerror
-                        lambda = lambda * C_up;     % increase lambda
-                        disp([num2str(toc),': Coefficient increased to increase convergence rate: Lambda = ',
-                        num2str(lambda)]);
-                        Qerror_old = 1;
-                    end
-
-                    dqw = -lambda * dQ; 
-                    qw  = qw + dqw;                 
-                    % adjust wellbore injection rate 
-                    Force(s_dof+WB_node) = qw;
-                    % update wellbore flux 
-                    q_tip_old = q(tip_node);
-
-                    dpw = lambda * dQ;      % change in wellbore pressure 
-                    pw = pw + dpw;         % updated wellbore pressure
-                    Pvar0(s_dof+1) = pw;
-                end
-            else
-                converged_Q = 1;
+            % pressure on well bore
+            for i = 1:length(WBnodes)
+                fwb = Cwb * (pw*eye(nsd) + S0) * n_WB(i,:)';
+                Force(WB_x(i)) = fwb(1);
+                Force(WB_y(i)) = fwb(2);
             end
-        end
 
-        if ~converged_Q
-            disp([num2str(toc),': FAILED TO SATISFY CONSERVATION OF FLUID MASS.']);
-            return;
-        end 
-        Q_avg_old = Q_avg; 
-        Vinj_old  = Vinj;
+            Pvar0(pressdofs) = pw;
+
+        % Newton-Raphson iteration    
+            [Pvar,q,NR,NRs,NRf,converged] = NRiter(Force, t, dt, s_dof, f_dof, fixed_dofs, Pvar0, Pvar_1, dynamic_ON);
+            if ~converged   % terminates the program if convergence is failed
+                return
+            end
+
+        disp([num2str(toc),': Computing fracture aperture'])
+
+        % Compute fracture aperture
+        Aperture(Pvar(1:s_dof));
+
 
         %% Post processing
         [Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] = PostProcessing(Pvar, Pvar0, Pvar_1, ...
@@ -358,14 +257,6 @@ for np = 1:npulse
 
             nt  = nt + 1;
             t0  = t;
-
-            if Control.Wellbore.rate_control
-                L0  = L;
-                tip = CMesh(1).tip_nodes;          % tip node of the crack
-                L   = CMesh(1).CrackLength(tip);   % fracture length
-                [~,t,~] = Wellbore(L);          % updating wellbore pressure and time
-                lambda  = lambda * sqrt(L0/L);     % updating lamdba (dp = lambda * dQ)
-            end
 
             dt = Control.Time.dtmin;
             t = t + dt;

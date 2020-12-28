@@ -130,23 +130,8 @@ if ~isempty(CMesh(1).conn)     % at least one fracture exists
     
     % Find location of the physical tip
     [ phys_tip ] = FindPhysicalTip;
-%     disp([num2str(toc),': Computing flowrate'])
-%     % Compute fluid volume
-%     [Q, Q_avg] = ComputeFlowrateVolume(t, dt, Q_avg);
 end
 
-% ========================= COMPUTE FLUID FLUX ============================
-% Compute fluid flux
-% disp([num2str(toc),': Computing fluid flux'])
-% ComputeFlux(Pvar(s_dof+1:end));
-% gplot = 0;
-% if gplot
-%     for nc = 1:ncrack
-%         figure
-%         xq = 1:length(CMesh(nc).q);
-%         plot(xq,CMesh(nc).q,'bo')
-%     end
-% end
 % ================== WRITING RESULTS TO OUTPUT FILES ======================
 if save_on && ~mod(n,Control.Postprocessing.OutputFreq)
     
