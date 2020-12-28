@@ -28,7 +28,6 @@ if nargin < 8
 end
 
 nne  = size(conn,2);                    % number of nodes per element
-nsd  = size(SMesh.nodes,2);             % number of space dimensions
 enrH = length(find(enrnodes == 1));     % Number of nodes enriched by Heaviside function
 
 if any(enrnodes)                        % enriched nodes exist
