@@ -1,12 +1,10 @@
-function phys_tip = FindPhysicalTip()
+function phys_tip = FindPhysicalTip(CMesh, Material)
 % FINDPHYSICALTIP Finds location of the physical tip (t_coh = 0) 
 % 
 % output : Phys_tip: location of the physical tip in crack coordinate
 % system (s=0 at the WB and s=L at the mathematical tip)
 
 % Written by Matin Parchei Esfahani, University of Waterloo, Oct. 2017
-
-global CMesh Material
 
 ncrack   = size(CMesh,2);                     % number of cracks
 Gc       = Material.solid.FractureEnergy;     % fracture energy

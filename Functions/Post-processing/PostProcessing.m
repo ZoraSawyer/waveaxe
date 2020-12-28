@@ -126,7 +126,7 @@ if ~isempty(CMesh(1).conn)     % at least one fracture exists
     Aperture(Pvar(1:s_dof));
     
     % Find location of the physical tip
-    [ phys_tip ] = FindPhysicalTip;
+    phys_tip = FindPhysicalTip(CMesh, Material);
 %     disp([num2str(toc),': Computing flowrate'])
 %     % Compute fluid volume
 %     [Q, Q_avg] = ComputeFlowrateVolume(t, dt, Q_avg);
