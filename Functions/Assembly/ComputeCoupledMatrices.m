@@ -261,7 +261,7 @@ for nc = 1:ncrack
 
             % Compute jump in shape functions, Ndis = N|pos - N|neg
             X = Np * C_nodes;                             % global coordinates of the quadrature point
-            [xi] = ParentCoordinates(X,etype,S_nodes);    % Parent coordinates of the quadrature point
+            xi = ParentCoordinates(X, etype, S_nodes, SMesh.MeshForm);    % Parent coordinates of the quadrature point
 
             
             N_pos = Nmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...

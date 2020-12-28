@@ -1,10 +1,8 @@
-function [pt] = ParentCoordinates(Gpt,elemType,nodes)
+function pt = ParentCoordinates(Gpt, elemType, nodes, MeshForm)
 %PARENTCOORDINATES Calculates local coordinates of a point from its global coordinates.
 
-global SMesh
-
 if (strcmp(elemType,'Q4') || strcmp(elemType,'Q8') || strcmp(elemType,'Q9')) ...
-        && strcmp(SMesh.MeshForm, 'STRUCTURED')
+        && strcmp(MeshForm, 'STRUCTURED')
     
     Xbar = sum(nodes(1:4,:))/4;                                            % Parent coordinates (xi-eta) could be
     l = norm( nodes(2,:)-nodes(1,:) );                                     % exactly calculated for quadralateral

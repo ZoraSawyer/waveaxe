@@ -41,7 +41,7 @@ elseif strcmp(SMesh.type, 'Q9')
     fLSrange = 5:8;                         % range of normal LS for each element
 end
 
-xi = ParentCoordinates(X,SMesh.type,xI);    % global coordinates transfered to 2D parent coordinates
+xi = ParentCoordinates(X, SMesh.type, xI, SMesh.MeshForm);    % global coordinates transfered to 2D parent coordinates
 
 if size(inputfield,2) == 1                                      % input field is the displacement field, d (nDoF X 1).
     % computing actual stress values
