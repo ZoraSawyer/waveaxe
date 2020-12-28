@@ -1,4 +1,4 @@
-function [tcoh, dtcohdw] = GetCohesive(w)
+function [tcoh, dtcohdw] = GetCohesive(w, Material)
 % GETCOHESIVE Computes cohesive traction and its derivative wrt fracture
 % aperture, given the fraqcture aperture at a point.
 %
@@ -8,9 +8,6 @@ function [tcoh, dtcohdw] = GetCohesive(w)
 %         (dt_coh/dw)
 
 % Written by Matin Parchei Esfahani, University of Waterloo
-
-
-global Material
 
 % Cohesive law constants
 switch Material.solid.cohesive.rule

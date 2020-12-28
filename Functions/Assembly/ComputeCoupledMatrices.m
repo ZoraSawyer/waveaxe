@@ -282,7 +282,7 @@ for nc = 1:ncrack
 
             % Compute aperture, Dw, dDw/dw, and dt_coh/dw
             w = n_cr'*Ndis*d(S_sctr);           % fracture aperture at GP
-            [tcoh,dtcohdw] = GetCohesive(w);    % dt_coh/dw
+            [tcoh, dtcohdw] = GetCohesive(w, Material);    % dt_coh/dw
             w = max(w,wmin);                    % modified aperture for cubic law
             Dw = w^3/mu/12;                     % Poiseuille flow (cubic law)
             dDwdw = w^2/mu/4;                   % dDw/dw
