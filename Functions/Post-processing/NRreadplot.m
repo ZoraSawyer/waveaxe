@@ -1,5 +1,3 @@
-global OutPath
-
 filename = [OutPath 'WB_NR_UD.dat'];
 fileID = fopen(filename,'r');
 count = 1;

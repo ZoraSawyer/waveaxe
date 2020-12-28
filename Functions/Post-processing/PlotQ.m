@@ -3,8 +3,6 @@
 
 % Written by Matin Parchei Esfahani, University of Waterloo, July 2017
 
-global OutPath
-
 for nc = 1:ncrack
     filename = [OutPath 'Flowrate' num2str(nc) '.dat'];
     fileID = fopen(filename,'r');

@@ -5,8 +5,6 @@
 
 % Written by Matin Parchei Esfahani, University of Waterloo, Sep. 2017
 
-global OutPath CMesh
-
 nplot = 5;                 % number of curves for each figure
 dn = floor((nt-1)/nplot);   % plot frequency
 
