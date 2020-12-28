@@ -123,8 +123,8 @@ if update     % Domain integrals must be updated
            [Nu,~] = Nmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
                SMesh.eLS(e,fLSrange,crnum), etype);         % N matrix at quadrature point
 
-           [Bu,Je] = Bmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
-               SMesh.eLS(e,fLSrange,crnum), etype);         % B matrix and Jacobian at quadrature point
+           [Bu, Je] = Bmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
+               SMesh.eLS(e,fLSrange,crnum), etype, nsd);         % B matrix and Jacobian at quadrature point
 
            Kuu_e = Kuu_e +  Bu' * D * Bu * Wi * det(Je);    % element stiffness matrix
            M_e   = M_e   +  Nu' * rho * Nu * Wi * det(Je);  % element mass matrix
@@ -273,10 +273,10 @@ for nc = 1:ncrack
 
             % Compute derivatives of shape functions on fracture faces
             if strcmp(Control.split,'UD')
-                [B_pos,~] = Bmatrix(xi,S_nodes,S_enodes,SMesh.EnrType(S_enodes),...
-                    SMesh.eLS(S_elem,fLSrange,nc),etype,1);     % Shape functions on the positive side of the crack
-                [B_neg,~] = Bmatrix(xi,S_nodes,S_enodes,SMesh.EnrType(S_enodes),...
-                    SMesh.eLS(S_elem,fLSrange,nc),etype,-1);    % Shape functions on the negative side of the crack
+                B_pos = Bmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
+                    SMesh.eLS(S_elem,fLSrange,nc), etype, nsd, 1);     % Shape functions on the positive side of the crack
+                B_neg = Bmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
+                    SMesh.eLS(S_elem,fLSrange,nc), etype, nsd, -1);    % Shape functions on the negative side of the crack
             end
             
 

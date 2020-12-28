@@ -47,7 +47,7 @@ if size(inputfield,2) == 1                                      % input field is
     % computing actual stress values
     D = SolidConstitutive(e, Material, SMesh, Domain);                                   % gives stress strain relation based on the constitutive law
     B = Bmatrix(xi, xI, enodes, SMesh.EnrType(enodes), ...
-        SMesh.eLS(e,fLSrange,crnum), SMesh.type);               % B matrix at point X
+        SMesh.eLS(e,fLSrange,crnum), SMesh.type, size(SMesh.nodes,2));               % B matrix at point X
     S = D*B*inputfield(sctr);                                   % S = [Sxx; Syy; Sxy]
     
 else % input field is the stress field, (3 X nnodes for 2D or 6 X nnodes for 3D)

@@ -13,6 +13,7 @@ function S = ComputeNodalStress(d, SMesh)
 
 % Copyright Matin Parchei Esfahani, University of Waterloo, June 2015
 
+nsd = size(SMesh.nodes,2);
 nn  = size(SMesh.nodes,1);          % number of nodes
 ne  = size(SMesh.conn,1);           % number of elements
 nne = size(SMesh.conn,2);           % number of nodes per element
@@ -58,8 +59,8 @@ for e = 1:ne                        % loop on elements
     end
         
     for n = 1:nne
-        [B,~] = Bmatrix(xi(n,:), xI, enodes, SMesh.EnrType(enodes),...
-            SMesh.eLS(e,fLSrange,crnum), etype);          % B matrix at nodes
+        B = Bmatrix(xi(n,:), xI, enodes, SMesh.EnrType(enodes),...
+            SMesh.eLS(e,fLSrange,crnum), etype, nsd);          % B matrix at nodes
         S(:,enodes(n)) = S(:,enodes(n)) + D*(B*d(sctr));  % stress tensor at each node (Voigt)
         count(enodes(n)) = count(enodes(n)) + 1;          % number of elements containing this node
     end
