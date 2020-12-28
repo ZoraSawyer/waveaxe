@@ -29,7 +29,7 @@ run(ConfigFileName);
 % MESH GENERATION
 if strcmp(MeshInput,'Gmsh')
     
-    [nodes,conn,left_edge,right_edge,top_edge,bot_edge] = LoadMesh(MeshFileName, nsd);
+    [nodes,conn,left_edge,right_edge,top_edge,bot_edge] = LoadMesh(MeshFileName, nsd, Control.InPath);
     
     nn  = size(nodes,1);        % number of nodes
     ne  = size(conn,1);         % number of elements
@@ -58,9 +58,6 @@ if strcmp(MeshInput,'Gmsh')
             nodes(I,2) = xc(2)+r*s;
         end
     end
-    
-    
-    
     
     L   = max(nodes)-min(nodes);           
     Lx  = L(1);                 % length of the model in x-directions
