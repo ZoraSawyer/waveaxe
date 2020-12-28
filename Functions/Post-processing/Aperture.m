@@ -52,14 +52,14 @@ for nc = 1:ncrack
         for npt = 1:i
             [xi] = ParentCoordinates(crnodes(npt,:),etype,xI);    % Parent coordinates of the crack node
 
-            [N,~] = Nmatrix(xi,xI,enodes,SMesh.EnrType(enodes),...
-                SMesh.eLS(emesh,fLSrange,nc),etype,1);     % positive side
+            N = Nmatrix(xi, xI, enodes, SMesh.EnrType(enodes),...
+                SMesh.eLS(emesh,fLSrange,nc), etype, nsd, 1);     % positive side
             dcr_pos = N*d(sctr);                           % crack nodes displacement (positive side)
             dcr([2*count-1,2*count]) = dcr_pos;         
             count = count + 1;
 
-            [N,~] = Nmatrix(xi,xI,enodes,SMesh.EnrType(enodes),...
-                SMesh.eLS(emesh,fLSrange,nc),etype,-1);    % negative side
+            N = Nmatrix(xi, xI, enodes, SMesh.EnrType(enodes),...
+                SMesh.eLS(emesh,fLSrange,nc), etype, nsd, -1);    % negative side
             dcr_neg = N*d(sctr);                           % crack nodes displacement (negative side)
             dcr([2*count-1,2*count]) = dcr_neg;
             count = count + 1;

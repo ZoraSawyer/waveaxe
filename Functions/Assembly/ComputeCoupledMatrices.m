@@ -120,8 +120,8 @@ if update     % Domain integrals must be updated
            xi = Q(q,:);
            Wi = W(q);
            
-           [Nu,~] = Nmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
-               SMesh.eLS(e,fLSrange,crnum), etype);         % N matrix at quadrature point
+           Nu = Nmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
+               SMesh.eLS(e,fLSrange,crnum), etype, nsd);         % N matrix at quadrature point
 
            [Bu, Je] = Bmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
                SMesh.eLS(e,fLSrange,crnum), etype, nsd);         % B matrix and Jacobian at quadrature point
@@ -264,10 +264,10 @@ for nc = 1:ncrack
             [xi] = ParentCoordinates(X,etype,S_nodes);    % Parent coordinates of the quadrature point
 
             
-            [N_pos,~] = Nmatrix(xi,S_nodes,S_enodes,SMesh.EnrType(S_enodes),...
-                SMesh.eLS(S_elem,fLSrange,nc),etype,1);     % Shape functions on the positive side of the crack
-            [N_neg,~] = Nmatrix(xi,S_nodes,S_enodes,SMesh.EnrType(S_enodes),...
-                SMesh.eLS(S_elem,fLSrange,nc),etype,-1);    % Shape functions on the negative side of the crack
+            N_pos = Nmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
+                SMesh.eLS(S_elem,fLSrange,nc), etype, nsd, 1);     % Shape functions on the positive side of the crack
+            N_neg = Nmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
+                SMesh.eLS(S_elem,fLSrange,nc), etype, nsd, -1);    % Shape functions on the negative side of the crack
 
             Ndis = N_pos - N_neg;   % Jump!
 

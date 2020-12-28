@@ -1,4 +1,4 @@
-function [N,J] = Nmatrix(xi,xI,conn,enrnodes,fI,etype,sign)
+function [N, J] = Nmatrix(xi, xI, conn, enrnodes, fI, etype, nsd, sign)
 %NMATRIX Computes FEM/XFEM shape functions and the corresponding Jacobian at a
 % given point of an element
 %
@@ -22,14 +22,11 @@ function [N,J] = Nmatrix(xi,xI,conn,enrnodes,fI,etype,sign)
 % Written by Matin Parchei Esfahani, University of Waterloo, Nov 2014
 % Last modified Oct. 2017 to include higher order elements. 
 
-global SMesh
-
 if nargin < 7
     sign = 0;
 end
 
 nne  = size(conn,2);                        % number of nodes per element
-nsd  = size(SMesh.nodes,2);                 % number of space dimensions
 enrH = length(find(enrnodes == 1));         % Number of nodes enriched by Heaviside function
 
 if any(enrnodes)    % enriched nodes exist
