@@ -1,4 +1,4 @@
-function prop_dir = PropCriterion(inputfield,gplot)
+function prop_dir = PropCriterion(inputfield, gplot, SMesh, CMesh, Material)
 % PROPCRITERION Compares the stress state of the domain against the fracture propagation
 % criterion and returns the propagation direction for each crack tip.
 %
@@ -23,9 +23,6 @@ function prop_dir = PropCriterion(inputfield,gplot)
 %                        |xn yn| ---> propagation direction of tip #n
 
 % Written by Matin Parchei Esfahani, University of Waterloo, Sep. 2015
-
-
-global SMesh CMesh Material
 
 if nargin < 2
     gplot = 0;

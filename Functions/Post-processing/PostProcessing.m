@@ -49,7 +49,7 @@ disp([num2str(toc),': Evaluating fracture propagation criterion'])
 if ~isempty(CMesh(1).conn)   % at least one fracture exists
     % CHECKING FOR FRACTURE PROPAGATION
     gplot = 0;  % plot mode is on when gplot = 1; used for debugging purposes
-    [prop_dir] = PropCriterion(S_tot,gplot);    % Direction of fracture propagation
+    prop_dir = PropCriterion(S_tot, gplot, SMesh, CMesh, Material);    % Direction of fracture propagation
 else                         % no fractrue exists
     prop_dir = [0 0];
 end
