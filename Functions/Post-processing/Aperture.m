@@ -1,12 +1,10 @@
-function [] = Aperture(d)
+function CMesh = Aperture(d, SMesh, CMesh)
 % APERTURE Computes fracture aperture
 %
 %   Input
 %        d : nodal displacement vector
 
 % Written by Matin Parchei Esfahani, University of Waterloo, Sep. 2016
-
-global SMesh CMesh
 
 etype = SMesh.type;
 ncrack = size(CMesh,2);     % number of cracks

@@ -265,7 +265,7 @@ for np = 1:npulse
 
             disp([num2str(toc),': Computing fracture aperture'])
             % Compute fracture aperture
-            Aperture(Pvar(1:s_dof));
+            CMesh = Aperture(Pvar(1:s_dof), SMesh, CMesh);
 
             if Control.Wellbore.rate_control
 
