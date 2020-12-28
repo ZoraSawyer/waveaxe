@@ -129,7 +129,7 @@ if ~isempty(CMesh(1).conn)     % at least one fracture exists
     phys_tip = FindPhysicalTip(CMesh, Material);
 %     disp([num2str(toc),': Computing flowrate'])
 %     % Compute fluid volume
-%     [Q, Q_avg] = ComputeFlowrateVolume(t, dt, Q_avg);
+%     [Q, Q_avg] = ComputeFlowrateVolume(CMesh, t, dt, Q_avg);
 end
 
 % ================== WRITING RESULTS TO OUTPUT FILES ======================

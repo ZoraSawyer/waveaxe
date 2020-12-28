@@ -271,7 +271,7 @@ for np = 1:npulse
 
                 disp([num2str(toc),': Computing flow rate'])
                 % Compute flow rate
-                [Q, Q_avg,Vcr, Vinj] = ComputeFlowrateVolume(t, dt, ...
+                [Q, Q_avg,Vcr, Vinj] = ComputeFlowrateVolume(CMesh, t, dt, ...
                                         Q_avg_old, Vinj_old, Q_inj);
 
                 dQ = Q_inj - Q;         % compute error 

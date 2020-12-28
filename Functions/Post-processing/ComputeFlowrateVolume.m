@@ -1,4 +1,4 @@
-function [Q, Q_avg, Vcr, Vinj] = ComputeFlowrateVolume(t, dt, Q_avg_old, Vinj_old, Qinj)
+function [Q, Q_avg, Vcr, Vinj] = ComputeFlowrateVolume(CMesh, t, dt, Q_avg_old, Vinj_old, Qinj)
 % COMPUTEFLOWRATEVOLUME Computes rate of change in fracture volume
 %
 % Input
@@ -15,9 +15,6 @@ function [Q, Q_avg, Vcr, Vinj] = ComputeFlowrateVolume(t, dt, Q_avg_old, Vinj_ol
 %       V_inj : Volume injected until time t
 
 % Written by Matin Parchei Esfahani, University of Waterloo, July 2017
-
-
-global CMesh
 
 ncrack = size(CMesh,2);     % number of fractures
 Vcr    = zeros(ncrack,1);   % volume of fracture
