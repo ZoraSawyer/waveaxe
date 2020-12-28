@@ -43,7 +43,7 @@ for nc = 1:ncrack
         emesh   = CMesh(nc).smesh_e(ncr);       % coresponding mesh element
         enodes  = SMesh.conn(emesh,:);          % element nodes
         xI      = SMesh.nodes(enodes,:);        % nodal coordinates of the element (global)
-        sctr    = GetScatter(enodes);           % element DOFs
+        sctr    = GetScatter(enodes, SMesh);           % element DOFs
 
         if ncr == length(CMesh(nc).smesh_e)     % element which contains fracture tip
             i = 2;

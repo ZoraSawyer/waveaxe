@@ -1,6 +1,4 @@
-function sctr = GetScatter( enodes )
-
-global SMesh
+function sctr = GetScatter(enodes, SMesh)
 
 nsd    = size(SMesh.nodes,2);     % number of space dimensions
 nen    = length(enodes);          % number of enodes

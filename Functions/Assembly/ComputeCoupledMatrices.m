@@ -105,7 +105,7 @@ if update     % Domain integrals must be updated
         end
 
         S_enodes = SMesh.conn(e,:);         % element connectivity
-        sctr     = GetScatter(S_enodes);    % element DOFs
+        sctr     = GetScatter(S_enodes, SMesh);    % element DOFs
         S_nodes  = SMesh.nodes(S_enodes,:); % element nodal coordinates
 
         % Compute Kuu
@@ -226,7 +226,7 @@ for nc = 1:ncrack
         S_elem   = CMesh(nc).smesh_e(e);        % coresponding mesh element
         S_enodes = SMesh.conn(S_elem,:);        % element nodes (SMesh)
         S_nodes  = SMesh.nodes(S_enodes,:);     % nodal coordinates of the element (global)
-        S_sctr   = GetScatter(S_enodes);        % cracked element DOFs (SMesh)
+        S_sctr   = GetScatter(S_enodes, SMesh);        % cracked element DOFs (SMesh)
 
         s    = CMesh(nc).CrackLength(C_enodes); % crack coordinates of nodes
         n_cr = CMesh(nc).surface_normal(e,:)';  % unit normal vector of the crack surface (negative side)

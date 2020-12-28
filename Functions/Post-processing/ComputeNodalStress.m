@@ -25,7 +25,7 @@ count = zeros(1,nn);
 for e = 1:ne                        % loop on elements
     
     enodes = SMesh.conn(e,:);       % element connectivity
-    sctr   = GetScatter(enodes);    % element DOFs
+    sctr   = GetScatter(enodes, SMesh);    % element DOFs
     xI     = SMesh.nodes(enodes,:); % element nodal coordinates
     
     if SMesh.Crnum(e)               % if element contains the crack 

@@ -29,22 +29,22 @@ format long
     top_nodes   = find(SMesh.nodes(:,2) == SMesh.Ly);   % top nodes
 
     % Left edge DoFs
-    sctr = GetScatter(left_nodes);
+    sctr = GetScatter(left_nodes, SMesh);
     left_edge_x = sctr(1:2:end-1);          % x-DoFs
     left_edge_y = sctr(2:2:end);            % y-DoFs
 
     % Right edge DoFs
-    sctr = GetScatter(right_nodes);
+    sctr = GetScatter(right_nodes, SMesh);
     right_edge_x = sctr(1:2:end-1);         % x-DoFs
     right_edge_y = sctr(2:2:end);           % y-DoFs
 
     % Top edge DoFs
-    sctr = GetScatter(top_nodes);
+    sctr = GetScatter(top_nodes, SMesh);
     top_edge_x = sctr(1:2:end-1);           % x-DoFs
     top_edge_y = sctr(2:2:end);             % y-DoFs
 
     % Bottom edge DoFs
-    sctr = GetScatter(bot_nodes);
+    sctr = GetScatter(bot_nodes, SMesh);
     bot_edge_x = sctr(1:2:end-1);           % x-DoFs
     bot_edge_y = sctr(2:2:end);             % y-DoFs
 
@@ -56,28 +56,28 @@ format long
     UL = find(SMesh.nodes(:,1) == 0        & SMesh.nodes(:,2) == SMesh.Ly);    % upper left corner
 
     % lower left corner DoFs
-    sctr = GetScatter(LL);
+    sctr = GetScatter(LL, SMesh);
     LL_x = sctr(1);                         % x-DoF
     LL_y = sctr(2);                         % y-DoF
 
     % lower right corner DoFs
-    sctr = GetScatter(LR);
+    sctr = GetScatter(LR, SMesh);
     LR_x = sctr(1);                         % x-DoF
     LR_y = sctr(2);                         % y-DoF
 
     % upper right corner DoFs
-    sctr = GetScatter(UR);
+    sctr = GetScatter(UR, SMesh);
     UR_x = sctr(1);                         % x-DoF
     UR_y = sctr(2);                         % y-DoF
 
     % upper left corner DoFs
-    sctr = GetScatter(UL);
+    sctr = GetScatter(UL, SMesh);
     UL_x = sctr(1);                         % x-DoF
     UL_y = sctr(2);                         % y-DoF
 
     % Wellbore DoFs
     WBnodes = find(SMesh.WBnodes == 1);
-    sctr = GetScatter(WBnodes);
+    sctr = GetScatter(WBnodes, SMesh);
     sctr = sctr(1:nsd*length(WBnodes));     % standard DoFs
     WB_x = sctr(1:2:end-1);                 % x-DoF
     WB_y = sctr(2:2:end);                   % y-DoF
@@ -212,7 +212,7 @@ for np = 1:npulse
             pressdofs = zeros(1,ncrack);
 
             for n = 1:ncrack
-                sctr = GetScatter(CMesh(n).smesh_tipedgenodes);
+                sctr = GetScatter(CMesh(n).smesh_tipedgenodes, SMesh);
                 tipdofs(count+1:count+2*nsd) = sctr(end-3:end);     % tip dofs of the n-th crack
                 pressdofs(n) = s_dof + count2 + 1;                  % Wellbore pressure dof of the n-th crack
                 count = count + 2*nsd;

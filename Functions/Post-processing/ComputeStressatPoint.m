@@ -26,7 +26,7 @@ if nargin == 2                              % if element containing point X is n
 end
 
 enodes = SMesh.conn(e,:);                   % element connectivity
-sctr   = GetScatter(enodes);                % element DOFs
+sctr   = GetScatter(enodes, SMesh);                % element DOFs
 xI     = SMesh.nodes(enodes,:);             % element nodal coordinates
 
 if SMesh.Crnum(e)                           % if element contains the crack 
