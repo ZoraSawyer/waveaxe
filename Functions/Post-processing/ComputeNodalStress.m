@@ -1,4 +1,4 @@
-function [ S ] = ComputeNodalStress( d )
+function S = ComputeNodalStress(d, SMesh)
 % COMPUTENODALSTRESS Returns a smooth matrix of nodal stresses
 %
 %   Input
@@ -12,8 +12,6 @@ function [ S ] = ComputeNodalStress( d )
 %           |Sxy_1 Sxy_2 ... Sxy_n|
 
 % Copyright Matin Parchei Esfahani, University of Waterloo, June 2015
-
-global SMesh
 
 nn  = size(SMesh.nodes,1);          % number of nodes
 ne  = size(SMesh.conn,1);           % number of elements
