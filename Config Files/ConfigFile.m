@@ -81,15 +81,15 @@ function [Mesh, Domain, Material, Control] = ConfigFile()
 
     % FRACTURE
     if Domain.Fracture_ON
-        ncrack = 2;             % number of fractures
+        Domain.ncrack = 2;             % number of fractures
         
-        Domain.x0 = zeros(1,ncrack);   % x-coordinate of the first tip
-        Domain.y0 = zeros(1,ncrack);   % y-coordinate of the first tip
-        Domain.xs = zeros(1,ncrack);   % x-coordinate of the second tip
-        Domain.ys = zeros(1,ncrack);   % x-coordinate of the second tip
+        Domain.x0 = zeros(1,Domain.ncrack);   % x-coordinate of the first tip
+        Domain.y0 = zeros(1,Domain.ncrack);   % y-coordinate of the first tip
+        Domain.xs = zeros(1,Domain.ncrack);   % x-coordinate of the second tip
+        Domain.ys = zeros(1,Domain.ncrack);   % x-coordinate of the second tip
         
-        crack_surface_normal = zeros(2,ncrack);                     % normal to the negative side
-        crack_front_normal   = zeros(2,ncrack);                     % normal to the first front (tip)
+        Domain.crack_surface_normal = zeros(2,Domain.ncrack);                     % normal to the negative side
+        Domain.crack_front_normal   = zeros(2,Domain.ncrack);                     % normal to the first front (tip)
         
         % crack #1
         L     = .039;                                               % initial length of the fracture (must be more that one element)
@@ -122,9 +122,9 @@ function [Mesh, Domain, Material, Control] = ConfigFile()
         crack_front_normal(:,2)   = [cos(theta); sin(theta)];       % normal to the first front (tip)
             
     else
-        ncrack = 0;
-        crack_surface_normal = [];
-        crack_front_normal   = [];
+        Domain.ncrack = 0;
+        Domain.crack_surface_normal = [];
+        Domain.crack_front_normal   = [];
     end
 
 % MATERIAL PROPERTIES AND CONSTITUTIVE LAW

@@ -200,6 +200,12 @@ end
 
 % ENRICHMENT
 % determine nodes to enrich
+if isfield(Domain, 'ncrack')
+  ncrack = Domain.ncrack;
+else
+  ncrack = 0;
+end
+  
 eLS = zeros(ne,2*nne,ncrack);  % level set value for corner nodes of each element [gI,fI] at each node.
 nLS = zeros(nn,2,ncrack);      % level set values at each node for each crack [gI, fI] 
 EnrType = zeros(1,nn);         % Enriched nodes
@@ -221,8 +227,8 @@ if Domain.Fracture_ON  % Model with fracture
         nodes_cr    = [];
         temp1       = [];
                 
-        normal  = crack_surface_normal(:,nc);
-        tangent = crack_front_normal(:,nc);
+        normal  = Domain.crack_surface_normal(:,nc);
+        tangent = Domain.crack_front_normal(:,nc);
     
         xtip0 = [Domain.x0(nc), Domain.y0(nc)];    % location of the tip
         xtips = [Domain.xs(nc), Domain.ys(nc)];    % location of the start point
@@ -382,7 +388,7 @@ if Domain.Fracture_ON  % Model with fracture
 
         normalvec = zeros(size(conn_cr,1),2);   % crack normal vectors (negative side)
         for n = 1:size(conn_cr,1)
-            normalvec(n,:) = crack_surface_normal(:,nc);
+            normalvec(n,:) = Domain.crack_surface_normal(:,nc);
         end
         
         gI_cr = zeros(size(nodes_cr,1),1);        % tangential LS of the crack nodes

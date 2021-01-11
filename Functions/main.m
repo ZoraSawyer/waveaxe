@@ -300,11 +300,11 @@ for np = 1:npulse
                     
                     if dQerror < 0
                         lambda = lambda * C_dn;     % decrease lambda
-                        disp([num2str(toc),': Coefficient decreased to maintain convergence: Lambda = ', 
+                        disp([num2str(toc),': Coefficient decreased to maintain convergence: Lambda = ', ...
                             num2str(lambda)]);
                     elseif dQerror < minerror
                         lambda = lambda * C_up;     % increase lambda
-                        disp([num2str(toc),': Coefficient increased to increase convergence rate: Lambda = ',
+                        disp([num2str(toc),': Coefficient increased to increase convergence rate: Lambda = ',...
                         num2str(lambda)]);
                         Qerror_old = 1;
                     end
