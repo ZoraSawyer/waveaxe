@@ -1,4 +1,4 @@
-function [S,e] = ComputeStressatPoint(X, inputfield, e, SMesh)
+function [S,e] = ComputeStressatPoint(X, inputfield, SMesh, e)
 %   COMPUTESTRESSATPOINT Computes stress at a given point, X, in the domain
 %
 %   Input
@@ -21,7 +21,7 @@ function [S,e] = ComputeStressatPoint(X, inputfield, e, SMesh)
 % Written by Matin Parchei Esfahani, University of Waterloo, Sep. 2015
 % last modified Oct. 2017 (Version 2)
 
-if nargin == 2                              % if element containing point X is not known
+if nargin < 4                             % if element containing point X is not known
     e = FindElement(X, SMesh);                     % find element containing point X
 end
 
@@ -41,7 +41,7 @@ elseif strcmp(SMesh.type, 'Q9')
     fLSrange = 5:8;                         % range of normal LS for each element
 end
 
-xi = ParentCoordinates(X, SMesh.type, xI, SMesh.MeshForm);    % global coordinates transfered to 2D parent coordinates
+xi = ParentCoordinates(X, SMesh.type, xI, SMesh.Form);    % global coordinates transfered to 2D parent coordinates
 
 if size(inputfield,2) == 1                                      % input field is the displacement field, d (nDoF X 1).
     % computing actual stress values
