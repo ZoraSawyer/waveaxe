@@ -244,11 +244,6 @@ for np = 1:npulse
                     tip         = CMesh(n).tip_nodes;           % tip nod of the crack mesh
                     Lt(nt+1,n)  = CMesh(n).CrackLength(tip);    % fracture length
                     tn(nt+1)    = t;                            % time
-                    if Control.Wellbore.rate_control
-                        q0t(nt)  = qw;                        % wellbore injection rate
-                        qnt(nt)  = q(tip_node);               % tip leak-off rate
-                        mass(nt) = dm;
-                    end
                end
             end
 
@@ -276,7 +271,3 @@ end
 
 save([iopath 'CrackMesh.mat'],'CMesh')
 disp([num2str(toc),': End of analysis'])
-
-% Optional post-processing
-    % PlotQ
-    % PlotFracture
