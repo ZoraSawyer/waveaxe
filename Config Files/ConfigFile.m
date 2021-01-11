@@ -100,8 +100,8 @@ function [Mesh, Domain, Material, Control] = ConfigFile()
         Domain.ys(1) = Domain.WB(1).center(2) +... 
                 Domain.WB(1).radius*sin(theta);                     % crack start point (y-coordinate)
         
-        Domain.x0(1) = xs(1) + L*cos(theta);                               % location of crack tip (x-coordinate)
-        Domain.y0(1) = ys(1) + L*sin(theta);                               % location of crack tip (y-coordinate)
+        Domain.x0(1) = Domain.xs(1) + L*cos(theta);                               % location of crack tip (x-coordinate)
+        Domain.y0(1) = Domain.ys(1) + L*sin(theta);                               % location of crack tip (y-coordinate)
                
         Domain.crack_surface_normal(:,1) = [-sin(theta); cos(theta)];      % normal to the negative side
         Domain.crack_front_normal(:,1)   = [cos(theta); sin(theta)];       % normal to the first front (tip)
@@ -115,8 +115,8 @@ function [Mesh, Domain, Material, Control] = ConfigFile()
         Domain.ys(2) = Domain.WB(1).center(2) + ...
                 Domain.WB(1).radius*sin(theta);                     % crack start point (y-coordinate)
         
-        Domain.x0(2) = xs(2) + L*cos(theta);                               % location of crack tip (x-coordinate)
-        Domain.y0(2) = ys(2) + L*sin(theta);                               % location of crack tip (y-coordinate)
+        Domain.x0(2) = Domain.xs(2) + L*cos(theta);                               % location of crack tip (x-coordinate)
+        Domain.y0(2) = Domain.ys(2) + L*sin(theta);                               % location of crack tip (y-coordinate)
                
         Domain.crack_surface_normal(:,2) = [-sin(theta); cos(theta)];      % normal to the negative side
         Domain.crack_front_normal(:,2)   = [cos(theta); sin(theta)];       % normal to the first front (tip)
