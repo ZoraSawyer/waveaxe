@@ -8,6 +8,7 @@ function CMesh = Aperture(d, SMesh, CMesh)
 
 etype = SMesh.type;
 ncrack = size(CMesh,2);     % number of cracks
+nsd = size(SMesh.nodes,2);
 
 % Compute fracture deformation
 
@@ -50,7 +51,7 @@ for nc = 1:ncrack
         end
 
         for npt = 1:i
-            xi = ParentCoordinates(crnodes(npt,:), etype, xI, SMesh.MeshForm);    % Parent coordinates of the crack node
+            xi = ParentCoordinates(crnodes(npt,:), etype, xI, SMesh.Form);    % Parent coordinates of the crack node
 
             N = Nmatrix(xi, xI, enodes, SMesh.EnrType(enodes),...
                 SMesh.eLS(emesh,fLSrange,nc), etype, nsd, 1);     % positive side
