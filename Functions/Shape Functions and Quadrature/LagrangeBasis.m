@@ -23,31 +23,31 @@ function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
 % Department of Mechanical Engineering 
 % Northwestern University    
     
-  if ( nargin == 2 )
+if ( nargin == 2 )
     dim=1;
-  end
+end
   
-  switch type
-   case 'L2'  
+switch type
+    case 'L2'  
     %%%%%%%%%%%%%%%%%%%%% L2 TWO NODE LINE ELEMENT %%%%%%%%%%%%%%%%%%%%% 
     %  
     %    1---------2
     %
-    if size(coord,2) < 1
-      disp('Error coordinate needed for the L2 element')
-    else
-     xi=coord(1);
-     N=([1-xi,1+xi]/2)';
-     dNdxi=[-1;1]/2;
-    end
+      if size(coord,2) < 1
+          disp('ERROR in LagrangeBasis: coordinate needed for the L2 element')
+      else
+          xi=coord(1);
+          N=([1-xi,1+xi]/2)';
+          dNdxi=[-1;1]/2;
+      end
   
-   case 'L3' 
+    case 'L3' 
     %%%%%%%%%%%%%%%%%%% L3 THREE NODE LINE ELEMENT %%%%%%%%%%%%%%%%%%%%% 
     %  
     %    1---------2----------3
     %
     if size(coord,2) < 1
-      disp('Error two coordinates needed for the L3 element')
+      disp('ERROR in LagrangeBasis: two coordinates needed for the L3 element')
     else
      xi=coord(1);
      N=[(1-xi)*xi/(-2);(1+xi)*xi/2;1-xi^2];
@@ -70,7 +70,7 @@ function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
     %    1--------------------2
     %
     if size(coord,2) < 2
-      disp('Error two coordinates needed for the T3 element')
+      disp('ERROR in LagrangeBasis: two coordinates needed for the T3 element')
     else
       xi=coord(1); eta=coord(2);
       N=[1-xi-eta;xi;eta];
@@ -93,7 +93,7 @@ function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
     %    1--------------------2
     %
     if size(coord,2) < 2
-      disp('Error two coordinates needed for the T4 element')
+      disp('ERROR in LagrangeBasis: two coordinates needed for the T4 element')
     else
       xi=coord(1); eta=coord(2);
       N=[1-xi-eta-3*xi*eta;xi*(1-3*eta);eta*(1-3*xi);9*xi*eta];
@@ -119,7 +119,7 @@ function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
     %    1---------4----------2
     %
     if size(coord,2) < 2
-      disp('Error two coordinates needed for the T6 element')
+      disp('ERROR in LagrangeBasis: two coordinates needed for the T6 element')
     else
       xi=coord(1); eta=coord(2);
       N=[1-3*(xi+eta)+4*xi*eta+2*(xi^2+eta^2);
@@ -154,7 +154,7 @@ function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
     %    1--------------------2
     %
     if size(coord,2) < 2
-      disp('Error two coordinates needed for the Q4 element')
+      disp('ERROR in LagrangeBasis: two coordinates needed for the Q4 element')
     else
       xi=coord(1); eta=coord(2);
       N=1/4*[ (1-xi)*(1-eta);
@@ -183,7 +183,7 @@ function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
     %    1----------5---------2
     %
     if size(coord,2) < 2
-      disp('Error two coordinates needed for the Q9 element')
+      disp('ERROR in LagrangeBasis: two coordinates needed for the Q9 element')
     else
       xi=coord(1); eta=coord(2);
       N=1/4*[xi*eta*(xi-1)*(eta-1);
@@ -218,7 +218,7 @@ function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
     %      1 -----|------3
     %         -   2  -
     if size(coord,2) < 3
-      disp('Error three coordinates needed for the H4 element')
+      disp('ERROR in LagrangeBasis: three coordinates needed for the H4 element')
     else
       xi=coord(1); eta=coord(2); zeta=coord(3);
       N=[1-xi-eta-zeta;
@@ -248,7 +248,7 @@ function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
     %          -  |  -
     %             2
     if size(coord,2) < 3
-      disp('Error three coordinates needed for the H10 element')
+      disp('ERROR in LagrangeBasis: three coordinates needed for the H10 element')
     else
       xi=coord(1); eta=coord(2); zeta=coord(3);
       phi=[1-xi-eta-zeta;  xi;  eta;  zeta];
@@ -295,7 +295,7 @@ function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
     %                  2
     %                
     if size(coord,2) < 3
-      disp('Error three coordinates needed for the B8 element')
+      disp('ERROR in LagrangeBasis: three coordinates needed for the B8 element')
     else
       xi=coord(1); eta=coord(2); zeta=coord(3);
       I1=1/2-coord/2;
@@ -339,7 +339,7 @@ function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
     %                  9
     %                
     if size(coord,2) < 3
-        disp('Error three coordinates needed for the B27 element')
+        disp('ERROR in LagrangeBasis: three coordinates needed for the B27 element')
     else
         N=zeros(27,1);
         dNdxi=zeros(27,3);
@@ -363,52 +363,23 @@ function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    otherwise
-    disp(['Element ',type,' not yet supported'])
+    disp(['ERROR in LagrangeBasis: Element ',type,' not yet supported'])
     N=[]; dNdxi=[];
   end
  
-  I=eye(dim);
-  Nv=[];
-  for i=1:size(N,1)
-    Nv=[Nv;I*N(i)];
+  I = eye(dim);
+  Nv = [];
+  for i = 1:size(N,1)
+    Nv = [Nv;I*N(i)];
   end
-%   
-%   if ( dim == 1 )
-%     B=dNdxi;
-%   elseif ( dim == 2 )
-%     B=zeros(dim*size(N,1),3);
-%     
-%     B(1:dim:dim*size(N,1)-1,1) = dNdxi(:,1);
-%     B(2:dim:dim*size(N,1),2)   = dNdxi(:,2);
-%     
-%     B(1:dim:dim*size(N,1)-1,3) = dNdxi(:,2);
-%     B(2:dim:dim*size(N,1),3)   = dNdxi(:,1);
-%   elseif ( dim == 3 )
-%     B=zeros(dim*size(N,1),6);
-%     
-%     disp('Error: need to add 3D N and dNdxi')
-%     
-%     B(1:dim:dim*size(N,1)-2,1) = dNdxi(:,1);
-%     B(2:dim:dim*size(N,1)-1,2) = dNdxi(:,2);
-%     B(3:dim:dim*size(N,1),3)   = dNdxi(:,3);
-%     
-%     B(2:dim:dim*size(N,1)-1,4) = dNdxi(:,3);
-%     B(3:dim:dim*size(N,1),4)   = dNdxi(:,2);
-%     
-%     B(3:dim:dim*size(N,1),5)   = dNdxi(:,1);
-%     B(1:dim:dim*size(N,1)-2,5) = dNdxi(:,3);
-%     
-%     B(1:dim:dim*size(N,1)-2,6) = dNdxi(:,2);
-%     B(2:dim:dim*size(N,1)-1,6) = dNdxi(:,1);
-%     
-%   end  
-  
-  % end of function
-  function [Ni,dNdxi] = L3at(xi,index)
-  
-  N=[(1-xi)*xi/(-2);1-xi^2;(1+xi)*xi/2];
-  dNdx=[xi-.5;-2*xi;xi+.5];
+
+end
+
+function [Ni,dNdxi] = L3at(xi,index)
+
+  N = [(1-xi)*xi/(-2);1-xi^2;(1+xi)*xi/2];
+  dNdx = [xi-.5;-2*xi;xi+.5];
   Ni = N(index);
   dNdxi = dNdx(index);
-  
-  
+
+end

@@ -46,14 +46,13 @@ NRs = zeros(max_iter,1);
 NRf = zeros(max_iter,1);
 
 if dynamic_ON
-    disp([num2str(toc), ': Dynamic Analysis'])
+    disp(['\t', num2str(toc), ': Dynamic Analysis'])
 else
-    disp([num2str(toc), ': Quasi-static Analysis'])
+    disp(['\t', num2str(toc), ': Quasi-static Analysis'])
 end
 
 msg_len = 1;
-disp([num2str(toc), ': Newton-Raphson Iteration'])
-fprintf('ITERATION  ');
+fprintf('\tITERATION  ');
 
 update = 1;
 

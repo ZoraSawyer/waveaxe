@@ -9,18 +9,6 @@ function [SMesh, CMesh] = PropagateCracks(dir_cr, nstep, t, SMesh, CMesh, OutPat
 
 %check input data against CMesh data
 
-% if ( size(vel_cr,1) ~= size(dir_cr,1) )
-%     disp('Error input array sizes do not match each other ')
-%     stop;
-% elseif size(vel_cr,1) ~= size(CMesh.tip_nodes,1)
-%     disp('Error input array sizes do not match crack mesh data')
-%     stop;
-% end
-% if size(dir_cr,1) ~= size(CMesh.tip_nodes,1)
-%     disp('Error input array sizes do not match crack mesh data')
-%     stop;
-% end
-
 edges = [1,2; 2,3; 3,4; 4,1]; % local Q4 elem connectivity
 
 ntips = size(dir_cr,1);
@@ -48,7 +36,7 @@ for i = 1:ntips
         gradg = dNdx*gI';
 
         if gradg'*tangent < 0 
-           disp('ERROR in propagatecrack - propagation direction is +/- 90 degree from previous direction');
+           disp('ERROR in PropagateCracks: propagation direction is +/- 90 degree from previous direction');
            stop
         end
 
@@ -78,7 +66,7 @@ for i = 1:ntips
             end
         end
         if eID2 <=0
-            disp('Error - could not find neighbouring element. ')
+            disp('ERROR in PropagateCracks: could not find neighbouring element.')
 
             stop;
         end
@@ -149,7 +137,7 @@ for i = 1:ntips
         if isempty(find(SMesh.EnrElements == eID2, 1))
             SMesh.EnrElements = [SMesh.EnrElements, eID2];
         else
-            disp('Error in propagatecrack - element is already enriched');
+            disp('ERROR in PropagateCracks: element is already enriched');
             stop;
         end
 

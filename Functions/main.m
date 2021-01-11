@@ -1,7 +1,7 @@
 clear 
 clc
 format long
-disp(' X-FEM HYDRAULIC FRACTURE SIMULATOR ')
+disp('X-FEM HYDRAULIC FRACTURE SIMULATOR ')
 tic
 
 %% User input
@@ -178,7 +178,7 @@ for np = 1:npulse
     % Run through timesteps
     while t <= tend
 
-        disp([num2str(toc),': SOLVING THE SYSTEM OF EQUATIONS'])
+        disp(['\t', num2str(toc),': SOLVING THE SYSTEM OF EQUATIONS'])
         % Initialize variables for timestep nt
             % updating force (NBC)
             Force = zeros(s_dof + f_dof,1);
@@ -228,7 +228,7 @@ for np = 1:npulse
                 return
             end
 
-        disp([num2str(toc),': Computing fracture aperture'])
+        disp(['\t', num2str(toc),': Computing fracture aperture'])
 
         % Compute fracture aperture
         CMesh = Aperture(Pvar(1:s_dof), SMesh, CMesh);

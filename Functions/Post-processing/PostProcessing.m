@@ -17,7 +17,7 @@ function [SMesh, CMesh, Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] 
 
 % Written by Matin Parchei Esfahani, University of Waterloo, April 2016
 
-disp([num2str(toc), ': Post processing']);
+disp(['\t', num2str(toc), ': Post processing']);
 
 s_dof  = stdDOFs + enrDOFs;                 % solid DoFs
 ncrack = size(CMesh,2);                     % number of cracks
@@ -31,7 +31,7 @@ nsd = size(SMesh.nodes,2);                  % number of space dimensions
 
 % ========================= COMPUTE SOLID STRESS ==========================
 % Compute Nodal Stresses
-disp([num2str(toc),': Computing stress in solid'])
+disp(['\t', num2str(toc),': Computing stress in solid'])
 S = ComputeNodalStress(Pvar(1:s_dof), SMesh, Material, Domain);   % Compute stress at nodes
 
 % in situ stress
@@ -45,7 +45,7 @@ S_tot = S + repmat(S0,1,size(S,2));   % total stress (S + S0)
 
 % ======================== FRACTURE PROPAGATION ===========================
 % Check for fracture propagation
-disp([num2str(toc),': Evaluating fracture propagation criterion'])
+disp(['\t', num2str(toc),': Evaluating fracture propagation criterion'])
 if ~isempty(CMesh(1).conn)   % at least one fracture exists
     % CHECKING FOR FRACTURE PROPAGATION
     gplot = 0;  % plot mode is on when gplot = 1; used for debugging purposes
@@ -121,7 +121,7 @@ end
 % ====================== COMPUTE FRACTURE APERTURE ========================
 % Compute fracture aperture
 if ~isempty(CMesh(1).conn)     % at least one fracture exists
-    disp([num2str(toc),': Computing fracture aperture'])
+    disp(['\t', num2str(toc),': Computing fracture aperture'])
     % Computing fracture aperture
     CMesh = Aperture(Pvar(1:s_dof), SMesh, CMesh);
     
@@ -132,7 +132,7 @@ end
 % ================== WRITING RESULTS TO OUTPUT FILES ======================
 if save_on && ~mod(n,Control.Postprocessing.OutputFreq)
     
-    disp([num2str(toc),': Saving results to output files'])
+    disp(['\t', num2str(toc),': Saving results to output files'])
     % Writing results of the current time step to file
     dMagCoef = Control.MagCoef;  % displacement magnification coeficient
     xdofs = 1:2:stdDOFs-1;       % x-direction dofs

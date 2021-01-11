@@ -15,7 +15,6 @@ function [SMesh, CMesh] = BuildMesh(Mesh, Domain, Control)
 %               elements that share an edges with e.  
 % TipElements = [ncr x 1] list of solid elements containing the crack tip
 
-disp('');
 disp('** Running Mesh Generator **');
 tic;
 disp([num2str(toc),': Reading config file...']);

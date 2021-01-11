@@ -128,7 +128,7 @@ for nc = 1:ncrack
         B = dot(edge_normal,prop_dir(nc,:)./norm(prop_dir(nc,:)));
 
         if (A*B <= 0) || (abs(B) < sin(pi/12))
-            disp('Modifying fracture path to avoid instability')
+            disp('\t Modifying fracture path to avoid instability')
             sIgN1 = sign(dot(edge_tangent,t));
             sIgN2 = sign(dot(edge_normal,t)*dot(edge_tangent,t));
             prop_dir(nc,:) = sIgN1*(edge_tangent + sIgN2*tan(pi/12)*edge_normal); % Propagating with 15 degrees outwards

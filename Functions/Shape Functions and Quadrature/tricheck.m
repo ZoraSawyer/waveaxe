@@ -14,17 +14,15 @@ count=0;
 Ojac = [];                                                                 % Line 19 added to the code.
 for e=1:size(conn,1)
   
-  sctr=conn(e,:);
-  [~,dNdxi]=LagrangeBasis('T3',[1/3 1/3]);
-  detJ=det(node(sctr,:)'*dNdxi);
-  if ( abs(detJ) < 0.0001 )                                                % Line 25 & 28: condition for "if" and "elseif" changed.
-    Ojac = [Ojac; e];                                                      % Line 21 added to the code.
-    %disp(['ZERO JACOBIAN IN ELEMENT ',num2str(e),' REMOVED'])
-  elseif ( detJ < 0 )
-    %disp(['NEGATIVE JACOBIAN IN ELEMENT ',num2str(e)])
-    conn(e,:)=fliplr(sctr);
-    count=count+1;
-  end
+    sctr=conn(e,:);
+    [~,dNdxi]=LagrangeBasis('T3',[1/3 1/3]);
+    detJ=det(node(sctr,:)'*dNdxi);
+    if ( abs(detJ) < 0.0001 )                                                % Line 25 & 28: condition for "if" and "elseif" changed.
+        Ojac = [Ojac; e];                                                      % Line 21 added to the code.
+    elseif ( detJ < 0 )
+        conn(e,:)=fliplr(sctr);
+        count=count+1;
+    end
 end
 conn(Ojac,:)=[];                                                           % Line 34 added to the code in order to 
 end

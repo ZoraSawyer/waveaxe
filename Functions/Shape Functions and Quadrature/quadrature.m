@@ -32,7 +32,7 @@ end
   if ( strcmp(qt,'GAUSS') == 1 ) 
 
     if ( quadorder > 8 )  % check for valid quadrature order
-      disp('Order of quadrature too high for Gaussian Quadrature'); 
+      disp('ERROR in Quadrature: Order of quadrature too high for Gaussian Quadrature'); 
       quadorder =8;
     end
     
@@ -138,7 +138,7 @@ end
         r1wt(8) = 0.362683783378362;
         
       otherwise
-        disp('Order of quadrature too high for Gaussian Quadrature'); 
+        disp('ERROR in Quadrature: Order of quadrature too high for Gaussian Quadrature'); 
 	
     end  % end of quadorder switch
 
@@ -182,7 +182,7 @@ end
       
       if ( quadorder ~= 1 &&  quadorder ~= 2 &&  quadorder ~= 3  ) 
         % check for valid quadrature order
-        disp('Incorect quadrature order for triangular quadrature');
+        disp('ERROR in Quadrature: Incorect quadrature order for triangular quadrature');
         quadorder = 1;
       end
       
@@ -213,7 +213,7 @@ end
     else  %%% TRIANGLES
       
       if ( quadorder > 8 ) % check for valid quadrature order
-        disp('Quadrature order too high for triangular quadrature');
+        disp('ERROR in Quadrature: Quadrature order too high for triangular quadrature');
         quadorder = 8;
       end
       
