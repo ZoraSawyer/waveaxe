@@ -2,10 +2,10 @@ function [Mesh, Domain, Material, Control] = ConfigFile()
 
 % INPUT/OUTPUT PATHS
     % Output files will be saved to this path (needs a "\" at the end)
-    Control.OutPath = 'C:\Users\endri\Documents\Matlab Results\Waveaxe\'; 
+    Control.OutPath = 'C:\Users\e2rivas\Documents\Matlab Results\Waveaxe\'; 
     
     % Input mesh file e.g., 1WB9in_Q4S_v2.msh must be in this folder
-    Control.InPath = 'C:\Users\endri\Documents\Codes\waveaxe\Config Files\';
+    Control.InPath = 'C:\Users\e2rivas\Documents\waveaxe\Config Files\';
     
     Mesh.Input = 'Gmsh';             % 'Built-in' : use the biult-in mesh generator
                                     % 'Gmsh'     : import Gmsh mesh file
