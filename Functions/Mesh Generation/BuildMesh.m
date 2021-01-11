@@ -24,7 +24,10 @@ disp([num2str(toc),': Reading config file...']);
 if strcmp(Mesh.Input, 'Gmsh')
     
     [nodes, conn] = LoadMesh(Mesh.FileName, Mesh.nsd, Control.InPath);
-    
+    left_edge   = [];
+    right_edge  = [];
+    top_edge    = [];
+    bot_edge    = [];
     nn  = size(nodes,1);        % number of nodes
     ne  = size(conn,1);         % number of elements
     nne = size(conn,2);         % number of nodes per element
@@ -218,7 +221,8 @@ eCrnum    = zeros(ne,1);    % indicates the crack number associated to each
 if Domain.Fracture_ON  % Model with fracture
         
     disp([num2str(toc),': Computing Level Set values at nodes...']);
-        
+    CMesh(ncrack) = struct();
+    
     for nc = 1:ncrack       % loop on cracks
         
         TipElements = [];
@@ -441,6 +445,9 @@ SMesh.Form        = Mesh.Form;
 SMesh.WBnodes     = WBnodes;
 
 % Write initial mesh to files
+if ~isfolder(Control.OutPath) 
+    mkdir(Control.OutPath)
+end
 filename = [Control.OutPath 'mesh.vtk.0'];
 description = 'Initial Solid Mesh Data';
 scalardata(1).name = 'ID';
@@ -460,7 +467,7 @@ for nc = 1:ncrack
 end
 cell_data(1).name = 'Inclusion';
 cell_data(1).data = elem_inc;
-WriteMesh2VTK(filename,description, SMesh.nodes,SMesh.conn,scalardata,cell_data);
+WriteMesh2VTK(filename, description, SMesh.nodes, SMesh.conn, scalardata, cell_data);
 
 for nc = 1:ncrack
     filestring = ['crack', num2str(nc), '.vtk.0'];
