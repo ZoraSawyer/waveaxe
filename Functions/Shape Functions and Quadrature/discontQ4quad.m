@@ -35,7 +35,7 @@ node = [upreg; dnreg];
 % loop over subtriangles to get quadrature points and weights
 pt = 1;
 for e = 1:size(tri,1)
-    [w,q] = Quadrature(order,'TRIANGULAR',2);
+    [w,q] = quadrature(order,'TRIANGULAR',2);
     % transform quadrature points into the parent element
     coord = node(tri(e,:),:);
     a = det([coord,[1;1;1]])/2;

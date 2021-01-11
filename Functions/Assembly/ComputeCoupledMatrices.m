@@ -99,7 +99,7 @@ if update     % Domain integrals must be updated
             nq = length(W);                                             % total number of quadrature points
         else                                % uncracked elements (may contain enriched nodes)
             crnum = 1;                                                  % for uncracked elements LS of the first crack is passed to Bmatrix
-            [W,Q] = Quadrature(nq, 'GAUSS', nsd);                       % quadrature points and weights
+            [W,Q] = quadrature(nq, 'GAUSS', nsd);                       % quadrature points and weights
             nq    = length(W);                                          % total number of quadrature points
         end
 
@@ -208,7 +208,7 @@ for nc = 1:ncrack
         t0 = CMesh(nc).t0(e);                   % initiation time of the fracture segment
         
         nq = 5;                                 % Order of quadrature
-        [W,Q] = Quadrature(nq, 'GAUSS', nsd-1); % quadrature points and weights
+        [W,Q] = quadrature(nq, 'GAUSS', nsd-1); % quadrature points and weights
         nq    = length(W);                      % total number of quadrature points
 
         C_enodes = CMesh(nc).conn(e,:);         % crack element connectivity (CMesh)
