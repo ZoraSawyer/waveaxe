@@ -22,7 +22,7 @@ function [N, J] = Nmatrix(xi, xI, conn, enrnodes, fI, etype, nsd, sign)
 % Written by Matin Parchei Esfahani, University of Waterloo, Nov 2014
 % Last modified Oct. 2017 to include higher order elements. 
 
-if nargin < 7
+if nargin < 8
     sign = 0;
 end
 
