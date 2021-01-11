@@ -23,8 +23,7 @@ disp([num2str(toc),': Reading config file...']);
 % MESH GENERATION
 if strcmp(Mesh.Input, 'Gmsh')
     
-    [nodes, conn, left_edge, right_edge, top_edge, bot_edge] = ...
-              LoadMesh(Mesh.FileName, Mesh.nsd, Control.InPath);
+    [nodes, conn] = LoadMesh(Mesh.FileName, Mesh.nsd, Control.InPath);
     
     nn  = size(nodes,1);        % number of nodes
     ne  = size(conn,1);         % number of elements
@@ -87,6 +86,7 @@ elseif strcmp(Mesh.Input,'Built-in')
             nx  = 2*nex+1;      % number of nodes in x-direction
             ny  = 2*ney+1;      % number of nodes in y-direction
     end
+
     ne  = nex*ney;              % number of elements
     nn  = nx*ny;                % total number of nodes
 
