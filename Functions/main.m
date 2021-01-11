@@ -219,7 +219,8 @@ for np = 1:npulse
 
         % Newton-Raphson iteration    
             [Pvar, q, NR, NRs, NRf, converged] = NRiter(Force, t, dt, ...
-                s_dof, f_dof, fixed_dofs, Pvar0, Pvar_1, dynamic_ON, Control);
+                s_dof, f_dof, fixed_dofs, Pvar0, Pvar_1, dynamic_ON, ...
+                SMesh, CMesh, Material, Control, Domain);
             if ~converged   % terminates the program if convergence is failed
                 return
             end

@@ -1,5 +1,6 @@
 function [Pvar, q, NR, NRs, NRf, converged] = ...
-    NRiter(Force, t, dt, ndof_s, ndof_c, fixed_dofs, Pvar0, Pvar_1, dynamic_ON, Control)
+    NRiter(Force, t, dt, ndof_s, ndof_c, fixed_dofs, Pvar0, Pvar_1, ...
+        dynamic_ON, SMesh, CMesh, Material, Control, Domain)
 %NRITER Newton-Raphson iterative process: Solves the nonlinear coupled system of 
 % equations for simulation of HF. Solves F(x)-f = 0
 %   Input - Force = [Ft + Fb - F_int    % solid force vectors
