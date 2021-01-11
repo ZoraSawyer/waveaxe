@@ -271,17 +271,12 @@ if Domain.Fracture_ON  % Model with fracture
                     TipElements = e;
                end
                count = count+1;
-               %if count == 2
-               %    disp('ERROR in BluidMesh - Initial Edge Crack Is Bigger Than 1 element');
-               %    stop;
-               %end
                % enrich this element
                EnrElements = [EnrElements,e];
 
                % define the crack mesh
                Xnew = zeros(2,2);
                temp = zeros(2,2);
-               %nodes_cr = zeros(2,2);
                xI = nodes(enodes,:);
                c = 1;
                
@@ -306,11 +301,6 @@ if Domain.Fracture_ON  % Model with fracture
                        temp(c,:) = sort(enodes(e_sctr));   % nodes of the SMesh coresponding to this element edge
                        c = c+1;
 
-        %                if max(g1,g2) >= 0 && (ee == 1 || ee == 3)
-        %                    TEdge_switch = 1;                            % a switch indicating whether tip edge is horizontal or 
-        %                elseif max(g1,g2) >= 0 && (ee == 2 || ee == 4)   % vertical used for preventing propagation along element edges
-        %                    TEdge_switch = 2;
-        %                end
                        if ismember(e,TipElements)
                            if enrpos == 3
                                if g1*g2 >= 0
@@ -329,18 +319,10 @@ if Domain.Fracture_ON  % Model with fracture
                if  (Xnew(2,:) - Xnew(1,:))*tangent  > 0
                    nodes_cr = [nodes_cr; Xnew(1,:); Xnew(2,:)];
                    temp1    = [temp1; temp(1,:); temp(2,:)];
-                   %nodes_cr(1,:) = Xnew(1,:);
-                   %nodes_cr(2,:) = Xnew(2,:);
                else
                    nodes_cr = [nodes_cr; Xnew(2,:); Xnew(1,:)];
                    temp1    = [temp1; temp(2,:); temp(1,:)];
-                   %nodes_cr(1,:) = Xnew(2,:);
-                   %nodes_cr(2,:) = Xnew(1,:);
                end
-               %cut_edge = temp1(end-1,:);   % edge cut by the crack
-               %conn_cr(1,:) = [1,2];
-               %inj_nodes = [1];
-               %tip_nodes = [2];
                
                if min(abs(fI)) < .05*sqrt(eArea(e)) %.5*(dLx+dLy)
                    [~,index] = min(abs(fI));
@@ -376,9 +358,6 @@ if Domain.Fracture_ON  % Model with fracture
         nodes_cr_2D(1:2:end-1,:) = nodes_cr;
         nodes_cr_2D(2:2:end,:)   = nodes_cr;
 
-        % cr_nodes_pos = nodes_cr;    % positive side nodes
-        % cr_nodes_neg = nodes_cr;    % negative side nodes
-        % 
         cr_conn_pos = 2.*conn_cr -1;  % positive side connectivity 
         cr_conn_neg = 2.*conn_cr;     % negative side connectivity
 
@@ -496,13 +475,3 @@ for nc = 1:ncrack
 end
 
 disp([num2str(toc),': Done.']);
-%*******************************************************
-
-
-
-
-
-
-
-
-
