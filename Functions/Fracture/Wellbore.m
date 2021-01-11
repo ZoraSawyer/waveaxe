@@ -1,4 +1,4 @@
-function [pw,t,Q] = Wellbore(var, Material, Control, mode)
+function [pw, t, Q] = Wellbore(var, Material, Control, mode)
 % WELLBORE Returns wellbore pressure, pw, at length L
 
 if nargin < 4

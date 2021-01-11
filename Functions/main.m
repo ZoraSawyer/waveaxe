@@ -129,7 +129,7 @@ tic
 
     nt     = 0;                               % time step number
     npulse = Control.Wellbore.npulse;         % number of pulses
-    iopath = IOPath;
+    iopath = Control.OutPath;
 
 %% Simulation
 % Loop through pressure pulses
@@ -202,7 +202,7 @@ for np = 1:npulse
 
 
         % Update WB pressure
-            [dpw,~,~] = Wellbore(t,'time');      % wellbore pressure at time t
+            dpw = Wellbore(t, Material, Control, 'time');      % wellbore pressure at time t
 
             pw = p_hyd + dpw;                       % update wellbore pressure
 
@@ -218,7 +218,8 @@ for np = 1:npulse
             Pvar0(pressdofs) = pw;
 
         % Newton-Raphson iteration    
-            [Pvar,q,NR,NRs,NRf,converged] = NRiter(Force, t, dt, s_dof, f_dof, fixed_dofs, Pvar0, Pvar_1, dynamic_ON);
+            [Pvar, q, NR, NRs, NRf, converged] = NRiter(Force, t, dt, ...
+                s_dof, f_dof, fixed_dofs, Pvar0, Pvar_1, dynamic_ON, Control);
             if ~converged   % terminates the program if convergence is failed
                 return
             end
@@ -227,7 +228,6 @@ for np = 1:npulse
 
         % Compute fracture aperture
         Aperture(Pvar(1:s_dof));
-
 
         %% Post processing
         [SMesh, CMesh, Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] = PostProcessing(Pvar, Pvar0, Pvar_1, ...
