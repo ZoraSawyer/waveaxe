@@ -1,4 +1,5 @@
-function [M, Kuu, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL] = ComputeCoupledMatrices(d,p,d0,p0,t,update)
+function [M, Kuu, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL, S11, S12] = ...
+    ComputeCoupledMatrices(d, p, d0, p0, t, update, SMesh, CMesh, Material, Control, Domain)
 % COMPUTECOUPLEDMATRICES Computes tangential matrices required for a fully coupled HF model
 %   Input - d: nodal values of solid displacements
 %           p: nodal values of fluid pressure
@@ -17,8 +18,6 @@ function [M, Kuu, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL] = ComputeCoupledMatr
 
 % Written by Matin Parchei Esfahani, May 2017, University of Waterloo
 % Revised, November 2018
-
-global SMesh CMesh Material Control Domain
 
 %in situ stress field
 Sx  = Domain.InsituStress.Sx;   % in situ stress in x-direction
@@ -105,7 +104,7 @@ if update     % Domain integrals must be updated
         end
 
         S_enodes = SMesh.conn(e,:);         % element connectivity
-        sctr     = GetScatter(S_enodes);    % element DOFs
+        sctr     = GetScatter(S_enodes, SMesh);    % element DOFs
         S_nodes  = SMesh.nodes(S_enodes,:); % element nodal coordinates
 
         % Compute Kuu
@@ -113,18 +112,18 @@ if update     % Domain integrals must be updated
         Kuu_e    = zeros(e_ndof,e_ndof);    % element stiffness matrix
         M_e      = zeros(e_ndof,e_ndof);    % element mass matrix
 
-        D = SolidConstitutive(e);           % Solid elasticity matrix
+        D = SolidConstitutive(e, Material, SMesh, Domain);           % Solid elasticity matrix
        
         for q = 1:nq    % loop on quadrature points
 
            xi = Q(q,:);
            Wi = W(q);
            
-           [Nu,~] = Nmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
-               SMesh.eLS(e,fLSrange,crnum), etype);         % N matrix at quadrature point
+           Nu = Nmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
+               SMesh.eLS(e,fLSrange,crnum), etype, nsd);         % N matrix at quadrature point
 
-           [Bu,Je] = Bmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
-               SMesh.eLS(e,fLSrange,crnum), etype);         % B matrix and Jacobian at quadrature point
+           [Bu, Je] = Bmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
+               SMesh.eLS(e,fLSrange,crnum), etype, nsd);         % B matrix and Jacobian at quadrature point
 
            Kuu_e = Kuu_e +  Bu' * D * Bu * Wi * det(Je);    % element stiffness matrix
            M_e   = M_e   +  Nu' * rho * Nu * Wi * det(Je);  % element mass matrix
@@ -219,7 +218,7 @@ for nc = 1:ncrack
         S_elem   = CMesh(nc).smesh_e(e);        % coresponding mesh element
         S_enodes = SMesh.conn(S_elem,:);        % element nodes (SMesh)
         S_nodes  = SMesh.nodes(S_enodes,:);     % nodal coordinates of the element (global)
-        S_sctr   = GetScatter(S_enodes);        % cracked element DOFs (SMesh)
+        S_sctr   = GetScatter(S_enodes, SMesh);        % cracked element DOFs (SMesh)
 
         s    = CMesh(nc).CrackLength(C_enodes); % crack coordinates of nodes
         n_cr = CMesh(nc).surface_normal(e,:)';  % unit normal vector of the crack surface (negative side)
@@ -249,19 +248,19 @@ for nc = 1:ncrack
 
             % Compute jump in shape functions, Ndis = N|pos - N|neg
             X = Np * C_nodes;                             % global coordinates of the quadrature point
-            [xi] = ParentCoordinates(X,etype,S_nodes);    % Parent coordinates of the quadrature point
+            xi = ParentCoordinates(X, etype, S_nodes, SMesh.Form);    % Parent coordinates of the quadrature point
 
             
-            [N_pos,~] = Nmatrix(xi,S_nodes,S_enodes,SMesh.EnrType(S_enodes),...
-                SMesh.eLS(S_elem,fLSrange,nc),etype,1);     % Shape functions on the positive side of the crack
-            [N_neg,~] = Nmatrix(xi,S_nodes,S_enodes,SMesh.EnrType(S_enodes),...
-                SMesh.eLS(S_elem,fLSrange,nc),etype,-1);    % Shape functions on the negative side of the crack
+            N_pos = Nmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
+                SMesh.eLS(S_elem,fLSrange,nc), etype, nsd, 1);     % Shape functions on the positive side of the crack
+            N_neg = Nmatrix(xi, S_nodes, S_enodes, SMesh.EnrType(S_enodes),...
+                SMesh.eLS(S_elem,fLSrange,nc), etype, nsd, -1);    % Shape functions on the negative side of the crack
 
             Ndis = N_pos - N_neg;   % Jump!            
 
             % Compute aperture, Dw, dDw/dw, and dt_coh/dw
             w = n_cr'*Ndis*d(S_sctr);           % fracture aperture at GP
-            [tcoh,dtcohdw] = GetCohesive(w);    % dt_coh/dw
+            [tcoh, dtcohdw] = GetCohesive(w, Material);    % dt_coh/dw
             w = max(w,wmin);                    % modified aperture for cubic law
             Dw = w^3/mu/12;                     % Poiseuille flow (cubic law)
             dDwdw = w^2/mu/4;                   % dDw/dw

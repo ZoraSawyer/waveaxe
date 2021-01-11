@@ -1,4 +1,4 @@
-function prop_dir = PropCriterion(inputfield,gplot)
+function prop_dir = PropCriterion(inputfield, gplot, SMesh, CMesh, Material)
 % PROPCRITERION Compares the stress state of the domain against the fracture propagation
 % criterion and returns the propagation direction for each crack tip.
 %
@@ -24,9 +24,6 @@ function prop_dir = PropCriterion(inputfield,gplot)
 
 % Written by Matin Parchei Esfahani, University of Waterloo, Sep. 2015
 
-
-global SMesh CMesh Material
-
 if nargin < 2
     gplot = 0;
 end
@@ -41,12 +38,11 @@ for nc = 1:ncrack
     t    = [n(2); -n(1)];                           % unit tangential vector to the surface of the last crack segment [cos(angle) sin(angle)]
 
     avgsize = sqrt(SMesh.eSize(CMesh(nc).tip_smesh_e));   % average element size
-    %(SMesh.eSize(1)+SMesh.eSize(2))/2;    
 
     % Computing stress ahead of the fracture tip
     tipSpoint = tip + .001*t';    % compute stress at this point
 
-    [stress, sp_elem] = ComputeStressatPoint(tipSpoint,inputfield);   % stress tensor at stress point
+    [stress, sp_elem] = ComputeStressatPoint(tipSpoint, inputfield, SMesh);   % stress tensor at stress point
 
     % Calculate principal stresses at the tip
     % stress
@@ -92,7 +88,7 @@ for nc = 1:ncrack
             S = n(2)*sin(theta(npt)) - n(1)*cos(theta(npt));    % sin of the rotation angle
             C = n(2)*cos(theta(npt)) + n(1)*sin(theta(npt));    % cos of the rotation angle
 
-            [stress,~] = ComputeStressatPoint(Spoints(:,npt)',inputfield);   % stress tensor at stress point and 
+            [stress,~] = ComputeStressatPoint(Spoints(:,npt)', inputfield, SMesh);   % stress tensor at stress point and 
                                                                                 % the corresponding element
             Stt(npt) = stress(1)*S^2 + stress(2)*C^2 - 2*stress(3)*C*S;         % hoop stress at stress point
             %Srt = (stress(2)-stress(1))*S*C + stress(3)*(C^2-S^2);             % shear stress at stress points
@@ -110,8 +106,6 @@ for nc = 1:ncrack
         [~,sp_prop] = max(Stt); % direction of propagation
 
         prop_dir(nc,:) = Spoints(:,sp_prop)' - tip;         % propagation direction vector (ATTENTION: Not Normalized)
-    %    prop_dir = [sqrt(2)/2,sqrt(2)/2];
-    %    plot stress points
 
         tip_elem = CMesh(nc).tip_smesh_e;       % element containing fracture tip
         tip_edge = CMesh(nc).smesh_tipedge;     % edge containing fracture tip
@@ -129,15 +123,12 @@ for nc = 1:ncrack
         edge_tangent = edge_tangent/norm(edge_tangent);                             % unit tangent vector
 
         edge_normal = [-edge_tangent(2), edge_tangent(1)];                          % unit normal vector to the edge containing fracture tip
-
-
         
         A = dot(edge_normal,t);
         B = dot(edge_normal,prop_dir(nc,:)./norm(prop_dir(nc,:)));
 
         if (A*B <= 0) || (abs(B) < sin(pi/12))
             disp('Modifying fracture path to avoid instability')
-%             dot(edge_tangent,t)
             sIgN1 = sign(dot(edge_tangent,t));
             sIgN2 = sign(dot(edge_normal,t)*dot(edge_tangent,t));
             prop_dir(nc,:) = sIgN1*(edge_tangent + sIgN2*tan(pi/12)*edge_normal); % Propagating with 15 degrees outwards

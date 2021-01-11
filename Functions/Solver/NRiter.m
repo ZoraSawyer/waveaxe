@@ -1,4 +1,5 @@
-function [Pvar,q,NR,NRs,NRf,converged] = NRiter(Force, t, dt, ndof_s, ndof_c, fixed_dofs, Pvar0, Pvar_1, dynamic_ON)
+function [Pvar, q, NR, NRs, NRf, converged] = ...
+    NRiter(Force, t, dt, ndof_s, ndof_c, fixed_dofs, Pvar0, Pvar_1, dynamic_ON, Control)
 %NRITER Newton-Raphson iterative process: Solves the nonlinear coupled system of 
 % equations for simulation of HF. Solves F(x)-f = 0
 %   Input - Force = [Ft + Fb - F_int    % solid force vectors
@@ -22,8 +23,6 @@ function [Pvar,q,NR,NRs,NRf,converged] = NRiter(Force, t, dt, ndof_s, ndof_c, fi
 %                        returns 0 if convergence fails.
 
 % Written by Matin Parchei Esfahani, May 2017, University of Waterloo
-
-global Control
 
 max_iter = Control.coupling.maxiter;      % Maximum iteration
 res_tol  = Control.coupling.tolerance;    % Residual norm tolerance
@@ -64,8 +63,9 @@ while (iter <= max_iter) && ~converged
     msg_len = numel(num2str(iter))+1;
     
     % Computer tangential matrices
-    [Mu, Ku, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL, Spp, Spu] = ComputeCoupledMatrices(...
-            Pvar(s_dof), Pvar(c_dof), Pvar0(s_dof), Pvar0(c_dof), t, update);
+    [Mu, Ku, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL, Spp, Spu] = ...
+        ComputeCoupledMatrices(Pvar(s_dof), Pvar(c_dof), Pvar0(s_dof), ...
+            Pvar0(c_dof), t, update, SMesh, CMesh, Material, Control, Domain);
     
     if update
         Kuu = Ku;

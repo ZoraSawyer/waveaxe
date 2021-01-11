@@ -1,32 +1,31 @@
-global x0 y0 xs ys
-global Domain Material Control OutPath InPath
+function [Mesh, Domain, Material, Control] = ConfigFile()
 
 % INPUT/OUTPUT PATHS
     % Output files will be saved to this path (needs a "\" at the end)
-    OutPath = 'C:\Users\endri\Documents\Matlab Results\Waveaxe\'; 
+    Control.OutPath = 'C:\Users\endri\Documents\Matlab Results\Waveaxe\'; 
     
     % Input mesh file e.g., 1WB9in_Q4S_v2.msh must be in this folder
-    InPath = 'C:\Users\endri\Documents\Codes\waveaxe\Config Files\';
+    Control.InPath = 'C:\Users\endri\Documents\Codes\waveaxe\Config Files\';
     
-    MeshInput = 'Gmsh';             % 'Built-in' : use the biult-in mesh generator
+    Mesh.Input = 'Gmsh';             % 'Built-in' : use the biult-in mesh generator
                                     % 'Gmsh'     : import Gmsh mesh file
                                     
 % GEOMETRY AND MESH 
-    nsd = 2;                            % number of space dimensions
+    Mesh.nsd = 2;                            % number of space dimensions
 
-    if strcmp(MeshInput, 'Built-in')
+    if strcmp(Mesh.Input, 'Built-in')
         
-        elemtype = 'Q4';                % order of approximation. If Q4 : 4-node biliniear element
+        Mesh.elemtype = 'Q4';                % order of approximation. If Q4 : 4-node biliniear element
                                         %                         If Q9 : 9-node quadratic element
                                         
-        MeshForm = 'STRUCTURED';        % STRUCTURED mesh
+        Mesh.Form = 'STRUCTURED';        % STRUCTURED mesh
         
         % DOMAIN SIZE
-        Lx  = 10;                       % size of domain in x-direction [m]
-        Ly  = 10;                       % size of domain in y-direction [m]
+        Domain.Lx  = 10;                       % size of domain in x-direction [m]
+        Domain.Ly  = 10;                       % size of domain in y-direction [m]
         
         % MESH PARAMETERS
-        meshtype = 'XUNIFORM';          % if "UNIFORM", uniform mesh in x- and y-directions.
+        Mesh.type = 'XUNIFORM';          % if "UNIFORM", uniform mesh in x- and y-directions.
                                         % if "NONUNIFORM", nonuniform mesh with ratio "rx" in
                                         % x-direction, and "ry" in y-direction.
                                         % if "XUNIFORM", uniform mesh in x-direction and nonuniform 
@@ -34,19 +33,19 @@ global Domain Material Control OutPath InPath
                                         % if "YUNIFORM", uniform mesh in y-direction and nonuniform 
                                         % mesh with ratio "rx" in x-direction.
 
-        nex = 200;                      % number of elements in x-direction (UNIFORM and XUNIFORM mesh)
-        ney = 199;                      % number of elements in y-direction (UNIFORM mesh)
+        Mesh.nex = 200;                      % number of elements in x-direction (UNIFORM and XUNIFORM mesh)
+        Mesh.ney = 199;                      % number of elements in y-direction (UNIFORM mesh)
 
-        s0x = .05;                      % finest mesh size in x-direction (NONUNIFORM mesh)
-        s0y = .05;                      % finest mesh size in y-direction (NONUNIFORM and XUNIFORM mesh)
+        Mesh.s0x = .05;                      % finest mesh size in x-direction (NONUNIFORM mesh)
+        Mesh.s0y = .05;                      % finest mesh size in y-direction (NONUNIFORM and XUNIFORM mesh)
 
-        rx  = 1.02;                     % mesh ratio in x-direction (NONUNIFORM mesh)
-        ry  = 1.05;                     % mesh ratio in y-direction (NONUNIFORM and XUNIFORM mesh)
+        Mesh.rx  = 1.02;                     % mesh ratio in x-direction (NONUNIFORM mesh)
+        Mesh.ry  = 1.05;                     % mesh ratio in y-direction (NONUNIFORM and XUNIFORM mesh)
         
     else
         % MESH INPUT FILE
-        MeshFileName = '1WB9in_Q4S_v2'; % mesh file name
-        MeshForm     = 'UNSTRUCTURED';  % STRUCTURED/UNSTRUCTURED Mesh     
+        Mesh.FileName = '1WB9in_Q4S_v2'; % mesh file name
+        Mesh.Form     = 'UNSTRUCTURED';  % STRUCTURED/UNSTRUCTURED Mesh     
     end
                                 
 % DOMAIN
@@ -82,15 +81,15 @@ global Domain Material Control OutPath InPath
 
     % FRACTURE
     if Domain.Fracture_ON
-        ncrack = 2;             % number of fractures
+        Domain.ncrack = 2;             % number of fractures
         
-        x0 = zeros(1,ncrack);   % x-coordinate of the first tip
-        y0 = zeros(1,ncrack);   % y-coordinate of the first tip
-        xs = zeros(1,ncrack);   % x-coordinate of the second tip
-        ys = zeros(1,ncrack);   % x-coordinate of the second tip
+        Domain.x0 = zeros(1,Domain.ncrack);   % x-coordinate of the first tip
+        Domain.y0 = zeros(1,Domain.ncrack);   % y-coordinate of the first tip
+        Domain.xs = zeros(1,Domain.ncrack);   % x-coordinate of the second tip
+        Domain.ys = zeros(1,Domain.ncrack);   % x-coordinate of the second tip
         
-        crack_surface_normal = zeros(2,ncrack);                     % normal to the negative side
-        crack_front_normal   = zeros(2,ncrack);                     % normal to the first front (tip)
+        Domain.crack_surface_normal = zeros(2,Domain.ncrack);                     % normal to the negative side
+        Domain.crack_front_normal   = zeros(2,Domain.ncrack);                     % normal to the first front (tip)
         
         % crack #1
         L     = .039;                                               % initial length of the fracture (must be more that one element)
@@ -123,9 +122,9 @@ global Domain Material Control OutPath InPath
         crack_front_normal(:,2)   = [cos(theta); sin(theta)];       % normal to the first front (tip)
             
     else
-        ncrack = 0;
-        crack_surface_normal = [];
-        crack_front_normal   = [];
+        Domain.ncrack = 0;
+        Domain.crack_surface_normal = [];
+        Domain.crack_front_normal   = [];
     end
 
 % MATERIAL PROPERTIES AND CONSTITUTIVE LAW
@@ -191,3 +190,5 @@ global Domain Material Control OutPath InPath
 
     Control.Postprocessing.OutputFreq = 10;                              % output frequency; frequency of saving output files
     Control.Postprocessing.PlotFreq   = 10;                              % frequency of fracture plots 
+    
+end

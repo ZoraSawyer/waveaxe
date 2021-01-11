@@ -1,8 +1,7 @@
-function [pw,t,Q] = Wellbore(var,mode)
+function [pw,t,Q] = Wellbore(var, Material, Control, mode)
 % WELLBORE Returns wellbore pressure, pw, at length L
 
-global Material Control
-if nargin == 1
+if nargin < 4
     mode = 'length';
 end
 

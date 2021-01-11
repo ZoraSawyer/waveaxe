@@ -1,6 +1,6 @@
-function [Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] =...
+function [SMesh, CMesh, Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] =...
     PostProcessing(Pvar, Pvar0, Pvar_1, stdDOFs, enrDOFs, Q, Q_avg,...
-    NR, t, n, save_on, dynamic_ON, dt)
+    NR, t, n, save_on, dynamic_ON, dt, SMesh, CMesh, Domain, Control)
 % POST PROCESSING Computes stress in solid, fluid flux
 % Checks for fracture propagation and updates fracture path if necessary
 % Writes data to output files
@@ -17,9 +17,6 @@ function [Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] =...
 
 % Written by Matin Parchei Esfahani, University of Waterloo, April 2016
 
-
-global SMesh CMesh Domain Control OutPath
-
 disp([num2str(toc), ': Post processing']);
 
 s_dof  = stdDOFs + enrDOFs;                 % solid DoFs
@@ -35,7 +32,7 @@ nsd = size(SMesh.nodes,2);                  % number of space dimensions
 % ========================= COMPUTE SOLID STRESS ==========================
 % Compute Nodal Stresses
 disp([num2str(toc),': Computing stress in solid'])
-S = ComputeNodalStress(Pvar(1:s_dof));   % Compute stress at nodes
+S = ComputeNodalStress(Pvar(1:s_dof), SMesh);   % Compute stress at nodes
 
 % in situ stress
 Sx  = Domain.InsituStress.Sx;   % in situ stress in x-direction
@@ -52,7 +49,7 @@ disp([num2str(toc),': Evaluating fracture propagation criterion'])
 if ~isempty(CMesh(1).conn)   % at least one fracture exists
     % CHECKING FOR FRACTURE PROPAGATION
     gplot = 0;  % plot mode is on when gplot = 1; used for debugging purposes
-    [prop_dir] = PropCriterion(S_tot,gplot);    % Direction of fracture propagation
+    prop_dir = PropCriterion(S_tot, gplot, SMesh, CMesh, Material);    % Direction of fracture propagation
 else                         % no fractrue exists
     prop_dir = [0 0];
 end
@@ -67,7 +64,7 @@ if norm(prop_dir) % fracture propagation
     Pvar0_old  = Pvar0;
     Pvar_1_old = Pvar_1;
     
-    PropagateCracks(prop_dir,n,t)       % Updating levelsets and enriched DOFs
+    [SMesh, CMesh] = PropagateCracks(prop_dir, n, t, SMesh, CMesh, Control.OutPath)       % Updating levelsets and enriched DOFs
                                            % based on the new fracture configuration
 
     enrDOFs = nsd*length(SMesh.EnrNodes);  % updating number of enriched DOFs
@@ -126,10 +123,10 @@ end
 if ~isempty(CMesh(1).conn)     % at least one fracture exists
     disp([num2str(toc),': Computing fracture aperture'])
     % Computing fracture aperture
-    Aperture(Pvar(1:s_dof));
+    CMesh = Aperture(Pvar(1:s_dof), SMesh, CMesh);
     
     % Find location of the physical tip
-    [ phys_tip ] = FindPhysicalTip;
+    phys_tip = FindPhysicalTip(CMesh, Material);
 end
 
 % ================== WRITING RESULTS TO OUTPUT FILES ======================
@@ -163,11 +160,11 @@ if save_on && ~mod(n,Control.Postprocessing.OutputFreq)
     scalardata(8).name = 'ax';       scalardata(8).data = a(xdofs);    
     scalardata(9).name = 'ay';       scalardata(9).data = a(ydofs);
     
-    filename = [OutPath 'Solution.vtk.' num2str(n)];    description = 'solution';   
+    filename = [Control.OutPath 'Solution.vtk.' num2str(n)];    description = 'solution';   
     WriteMesh2VTK(filename, description, deformedshape, SMesh.conn, scalardata);
     
     % Saving NR iterations
-    filename = [OutPath 'NR.dat'];
+    filename = [Control.OutPath 'NR.dat'];
     fileID = fopen(filename,'a');
     fprintf(fileID,'%e\n',NR);
     fclose(fileID);
@@ -200,20 +197,20 @@ if save_on && ~mod(n,Control.Postprocessing.OutputFreq)
             fracdata(3).name = 'pressure';  fracdata(3).data = pressure;
             fracdata(4).name = 'aperture';  fracdata(4).data = aperture;
 
-            filename = [OutPath 'Fracture' num2str(nc) '.vtk.' num2str(n)];    description = 'fracture';   
+            filename = [Control.OutPath 'Fracture' num2str(nc) '.vtk.' num2str(n)];    description = 'fracture';   
             WriteMesh2VTK(filename, description, deformedshape, CMesh(nc).conn2D, fracdata);
 
             tip_location = CMesh(nc).nodes(CMesh(nc).tip_nodes,:); % Location of the fracture tip
 
             % Writing location of the fracture tip to file
             tip = CMesh(nc).tip_nodes;                             % tip node of the fracture
-            filename = [OutPath 'TipLocation' num2str(nc) '.dat'];
+            filename = [Control.OutPath 'TipLocation' num2str(nc) '.dat'];
             fileID = fopen(filename,'a');
             fprintf(fileID,'%f %f %f %f %f\n',t,tip_location,CMesh(nc).CrackLength(tip),phys_tip(nc));
             fclose(fileID);
             
             % Saving fracture volume to file
-            filename = [OutPath 'Flowrate' num2str(nc) '.dat'];
+            filename = [Control.OutPath 'Flowrate' num2str(nc) '.dat'];
             fileID = fopen(filename,'a');
             fprintf(fileID,'%f %f %f\n',t,Q(nc),Q_avg(nc));
             fclose(fileID);

@@ -1,4 +1,4 @@
-function BuildMesh(Lx, Ly, nex, ney)
+function [SMesh, CMesh] = BuildMesh(Mesh, Domain, Control)
 % BUILDMESH Builds a structured mesh
 % The mesh date is written to a file in VTK form to be read by paraview.
 % Last Modified Nov 7, 2012
@@ -15,21 +15,16 @@ function BuildMesh(Lx, Ly, nex, ney)
 %               elements that share an edges with e.  
 % TipElements = [ncr x 1] list of solid elements containing the crack tip
 
-clear;
-global Domain SMesh CMesh
-global ConfigFileName
-global OutPath
-
 disp('');
 disp('** Running Mesh Generator **');
 tic;
 disp([num2str(toc),': Reading config file...']);
-run(ConfigFileName);
 
 % MESH GENERATION
-if strcmp(MeshInput,'Gmsh')
+if strcmp(Mesh.Input, 'Gmsh')
     
-    [nodes,conn,left_edge,right_edge,top_edge,bot_edge] = LoadMesh(MeshFileName, nsd);
+    [nodes, conn, left_edge, right_edge, top_edge, bot_edge] = ...
+              LoadMesh(Mesh.FileName, Mesh.nsd, Control.InPath);
     
     nn  = size(nodes,1);        % number of nodes
     ne  = size(conn,1);         % number of elements
@@ -37,8 +32,8 @@ if strcmp(MeshInput,'Gmsh')
     nex = [];
     ney = [];
     
-    nodeconn = zeros(nn,4);     % nodal connectivity
-    elem_inc = zeros(1,ne);     % indicates the material inclusion each element belongs to
+    nodeconn = zeros(nn, 4);     % nodal connectivity
+    elem_inc = zeros(1, ne);     % indicates the material inclusion each element belongs to
     
     % modify mesh to actual wellbore size.
     Lold = Domain.WB(1).radiusmesh; % radius of well in original mesh
@@ -59,10 +54,7 @@ if strcmp(MeshInput,'Gmsh')
         end
     end
     
-    
-    
-    
-    L   = max(nodes)-min(nodes);           
+    L   = max(nodes) - min(nodes);           
     Lx  = L(1);                 % length of the model in x-directions
     Ly  = L(2);                 % length of the model in y-directions
     
@@ -72,9 +64,18 @@ if strcmp(MeshInput,'Gmsh')
         type = 'Q9';            % 9-node quadrilateral element
     end
     
-elseif strcmp(MeshInput,'Built-in')
+elseif strcmp(Mesh.Input,'Built-in')
+    Lx = Domain.Lx;
+    Ly = Domain.Ly;
+    nex = Mesh.nex;
+    ney = Mesh.ney;
+    s0x = Mesh.s0x;
+    s0y = Mesh.s0y;
+    rx = Mesh.rx;
+    ry = Mesh.ry;
 
-    [sx,sy,nex,ney] = MeshSegments(meshtype, elemtype, Lx, Ly, nex, ney, s0x, s0y, rx, ry);
+    [sx, sy, nex, ney] = MeshSegments(Mesh.type, Mesh.elemtype, ...
+          Lx, Ly, nex, ney, s0x, s0y, rx, ry);
 
     switch elemtype
         case 'Q4'
@@ -89,18 +90,18 @@ elseif strcmp(MeshInput,'Built-in')
     ne  = nex*ney;              % number of elements
     nn  = nx*ny;                % total number of nodes
 
-    conn = zeros(ne,nne);       % element connectivity
-    nodes = zeros(nn,nsd);      % nodal coordinates
-    nodeconn = zeros(nn,4);     % nodal connectivity
-    elem_inc = zeros(1,ne);     % indicates the material inclusion each element belongs to
+    conn = zeros(ne, nne);       % element connectivity
+    nodes = zeros(nn, nsd);      % nodal coordinates
+    nodeconn = zeros(nn, 4);     % nodal connectivity
+    elem_inc = zeros(1, ne);     % indicates the material inclusion each element belongs to
 
     disp([num2str(toc),': Computing  nodal locations...']);
 
     c=1;
     for i=1:ny
         for j=1:nx 
-            nodes(c,1)=sx(j);
-            nodes(c,2)=sy(i);
+            nodes(c,1) = sx(j);
+            nodes(c,2) = sy(i);
             c=c+1;
         end    
     end
@@ -199,6 +200,12 @@ end
 
 % ENRICHMENT
 % determine nodes to enrich
+if isfield(Domain, 'ncrack')
+  ncrack = Domain.ncrack;
+else
+  ncrack = 0;
+end
+  
 eLS = zeros(ne,2*nne,ncrack);  % level set value for corner nodes of each element [gI,fI] at each node.
 nLS = zeros(nn,2,ncrack);      % level set values at each node for each crack [gI, fI] 
 EnrType = zeros(1,nn);         % Enriched nodes
@@ -220,11 +227,11 @@ if Domain.Fracture_ON  % Model with fracture
         nodes_cr    = [];
         temp1       = [];
                 
-        normal  = crack_surface_normal(:,nc);
-        tangent = crack_front_normal(:,nc);
+        normal  = Domain.crack_surface_normal(:,nc);
+        tangent = Domain.crack_front_normal(:,nc);
     
-        xtip0 = [x0(nc),y0(nc)];    % location of the tip
-        xtips = [xs(nc),ys(nc)];    % location of the start point
+        xtip0 = [Domain.x0(nc), Domain.y0(nc)];    % location of the tip
+        xtips = [Domain.xs(nc), Domain.ys(nc)];    % location of the start point
         
         fI  = zeros(1,4);   % normal LS
         gI  = zeros(1,4);   % tangent LS
@@ -264,17 +271,12 @@ if Domain.Fracture_ON  % Model with fracture
                     TipElements = e;
                end
                count = count+1;
-               %if count == 2
-               %    disp('ERROR in BluidMesh - Initial Edge Crack Is Bigger Than 1 element');
-               %    stop;
-               %end
                % enrich this element
                EnrElements = [EnrElements,e];
 
                % define the crack mesh
                Xnew = zeros(2,2);
                temp = zeros(2,2);
-               %nodes_cr = zeros(2,2);
                xI = nodes(enodes,:);
                c = 1;
                
@@ -299,11 +301,6 @@ if Domain.Fracture_ON  % Model with fracture
                        temp(c,:) = sort(enodes(e_sctr));   % nodes of the SMesh coresponding to this element edge
                        c = c+1;
 
-        %                if max(g1,g2) >= 0 && (ee == 1 || ee == 3)
-        %                    TEdge_switch = 1;                            % a switch indicating whether tip edge is horizontal or 
-        %                elseif max(g1,g2) >= 0 && (ee == 2 || ee == 4)   % vertical used for preventing propagation along element edges
-        %                    TEdge_switch = 2;
-        %                end
                        if ismember(e,TipElements)
                            if enrpos == 3
                                if g1*g2 >= 0
@@ -322,18 +319,10 @@ if Domain.Fracture_ON  % Model with fracture
                if  (Xnew(2,:) - Xnew(1,:))*tangent  > 0
                    nodes_cr = [nodes_cr; Xnew(1,:); Xnew(2,:)];
                    temp1    = [temp1; temp(1,:); temp(2,:)];
-                   %nodes_cr(1,:) = Xnew(1,:);
-                   %nodes_cr(2,:) = Xnew(2,:);
                else
                    nodes_cr = [nodes_cr; Xnew(2,:); Xnew(1,:)];
                    temp1    = [temp1; temp(2,:); temp(1,:)];
-                   %nodes_cr(1,:) = Xnew(2,:);
-                   %nodes_cr(2,:) = Xnew(1,:);
                end
-               %cut_edge = temp1(end-1,:);   % edge cut by the crack
-               %conn_cr(1,:) = [1,2];
-               %inj_nodes = [1];
-               %tip_nodes = [2];
                
                if min(abs(fI)) < .05*sqrt(eArea(e)) %.5*(dLx+dLy)
                    [~,index] = min(abs(fI));
@@ -369,9 +358,6 @@ if Domain.Fracture_ON  % Model with fracture
         nodes_cr_2D(1:2:end-1,:) = nodes_cr;
         nodes_cr_2D(2:2:end,:)   = nodes_cr;
 
-        % cr_nodes_pos = nodes_cr;    % positive side nodes
-        % cr_nodes_neg = nodes_cr;    % negative side nodes
-        % 
         cr_conn_pos = 2.*conn_cr -1;  % positive side connectivity 
         cr_conn_neg = 2.*conn_cr;     % negative side connectivity
 
@@ -381,7 +367,7 @@ if Domain.Fracture_ON  % Model with fracture
 
         normalvec = zeros(size(conn_cr,1),2);   % crack normal vectors (negative side)
         for n = 1:size(conn_cr,1)
-            normalvec(n,:) = crack_surface_normal(:,nc);
+            normalvec(n,:) = Domain.crack_surface_normal(:,nc);
         end
         
         gI_cr = zeros(size(nodes_cr,1),1);        % tangential LS of the crack nodes
@@ -453,11 +439,11 @@ SMesh.left_edge   = left_edge;
 SMesh.right_edge  = right_edge;
 SMesh.top_edge    = top_edge;
 SMesh.bot_edge    = bot_edge;
-SMesh.MeshForm    = MeshForm;
+SMesh.Form        = Mesh.Form;
 SMesh.WBnodes     = WBnodes;
 
 % Write initial mesh to files
-filename = [OutPath 'mesh.vtk.0'];
+filename = [Control.OutPath 'mesh.vtk.0'];
 description = 'Initial Solid Mesh Data';
 scalardata(1).name = 'ID';
 scalardata(1).data = 1:nn;
@@ -480,7 +466,7 @@ WriteMesh2VTK(filename,description, SMesh.nodes,SMesh.conn,scalardata,cell_data)
 
 for nc = 1:ncrack
     filestring = ['crack', num2str(nc), '.vtk.0'];
-    filename = [OutPath filestring];
+    filename = [Control.OutPath filestring];
     description = 'Initial Crack Mesh Data';
     S = struct('name',{},'data',{});
     S(1).name = 'ID';
@@ -489,13 +475,3 @@ for nc = 1:ncrack
 end
 
 disp([num2str(toc),': Done.']);
-%*******************************************************
-
-
-
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-function PropagateCracks(dir_cr,nstep,t)
+function [SMesh, CMesh] = PropagateCracks(dir_cr, nstep, t, SMesh, CMesh, OutPath)
 % PROPAGATECRACKS Updates the crack geometry, mesh and related data
 % structures when the cracks propagate.
 %
@@ -6,11 +6,6 @@ function PropagateCracks(dir_cr,nstep,t)
 % vel_cr = [ncr x 1] array of crack tip velocities.
 % dir_cr = [ncr x 2] array of unit vectors giving the direction of crack
 %          propagation
-
-global SMesh % Data for Solid Mesh
-global CMesh % Data for crack mesh.
-
-global OutPath % Input/Output files path
 
 %check input data against CMesh data
 

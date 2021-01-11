@@ -1,4 +1,4 @@
-function [ S ] = ComputeNodalStress( d )
+function S = ComputeNodalStress(d, SMesh)
 % COMPUTENODALSTRESS Returns a smooth matrix of nodal stresses
 %
 %   Input
@@ -13,8 +13,7 @@ function [ S ] = ComputeNodalStress( d )
 
 % Copyright Matin Parchei Esfahani, University of Waterloo, June 2015
 
-global SMesh
-
+nsd = size(SMesh.nodes,2);
 nn  = size(SMesh.nodes,1);          % number of nodes
 ne  = size(SMesh.conn,1);           % number of elements
 nne = size(SMesh.conn,2);           % number of nodes per element
@@ -25,7 +24,7 @@ count = zeros(1,nn);
 for e = 1:ne                        % loop on elements
     
     enodes = SMesh.conn(e,:);       % element connectivity
-    sctr   = GetScatter(enodes);    % element DOFs
+    sctr   = GetScatter(enodes, SMesh);    % element DOFs
     xI     = SMesh.nodes(enodes,:); % element nodal coordinates
     
     if SMesh.Crnum(e)               % if element contains the crack 
@@ -34,7 +33,7 @@ for e = 1:ne                        % loop on elements
         crnum = 1;                  % LS of the first crack is passed to Bmatrix
     end
     
-    D = SolidConstitutive(e);       % gives stress strain relation based on the constitutive law
+    D = SolidConstitutive(e, Material, SMesh, Domain);       % gives stress strain relation based on the constitutive law
     
     switch nne
         case 4                      % Q4 element
@@ -60,8 +59,8 @@ for e = 1:ne                        % loop on elements
     end
         
     for n = 1:nne
-        [B,~] = Bmatrix(xi(n,:), xI, enodes, SMesh.EnrType(enodes),...
-            SMesh.eLS(e,fLSrange,crnum), etype);          % B matrix at nodes
+        B = Bmatrix(xi(n,:), xI, enodes, SMesh.EnrType(enodes),...
+            SMesh.eLS(e,fLSrange,crnum), etype, nsd);          % B matrix at nodes
         S(:,enodes(n)) = S(:,enodes(n)) + D*(B*d(sctr));  % stress tensor at each node (Voigt)
         count(enodes(n)) = count(enodes(n)) + 1;          % number of elements containing this node
     end

@@ -1,12 +1,10 @@
-function [] = Aperture(d)
+function CMesh = Aperture(d, SMesh, CMesh)
 % APERTURE Computes fracture aperture
 %
 %   Input
 %        d : nodal displacement vector
 
 % Written by Matin Parchei Esfahani, University of Waterloo, Sep. 2016
-
-global SMesh CMesh
 
 etype = SMesh.type;
 ncrack = size(CMesh,2);     % number of cracks
@@ -43,7 +41,7 @@ for nc = 1:ncrack
         emesh   = CMesh(nc).smesh_e(ncr);       % coresponding mesh element
         enodes  = SMesh.conn(emesh,:);          % element nodes
         xI      = SMesh.nodes(enodes,:);        % nodal coordinates of the element (global)
-        sctr    = GetScatter(enodes);           % element DOFs
+        sctr    = GetScatter(enodes, SMesh);           % element DOFs
 
         if ncr == length(CMesh(nc).smesh_e)     % element which contains fracture tip
             i = 2;
@@ -52,16 +50,16 @@ for nc = 1:ncrack
         end
 
         for npt = 1:i
-            [xi] = ParentCoordinates(crnodes(npt,:),etype,xI);    % Parent coordinates of the crack node
+            xi = ParentCoordinates(crnodes(npt,:), etype, xI, SMesh.MeshForm);    % Parent coordinates of the crack node
 
-            [N,~] = Nmatrix(xi,xI,enodes,SMesh.EnrType(enodes),...
-                SMesh.eLS(emesh,fLSrange,nc),etype,1);     % positive side
+            N = Nmatrix(xi, xI, enodes, SMesh.EnrType(enodes),...
+                SMesh.eLS(emesh,fLSrange,nc), etype, nsd, 1);     % positive side
             dcr_pos = N*d(sctr);                           % crack nodes displacement (positive side)
             dcr([2*count-1,2*count]) = dcr_pos;         
             count = count + 1;
 
-            [N,~] = Nmatrix(xi,xI,enodes,SMesh.EnrType(enodes),...
-                SMesh.eLS(emesh,fLSrange,nc),etype,-1);    % negative side
+            N = Nmatrix(xi, xI, enodes, SMesh.EnrType(enodes),...
+                SMesh.eLS(emesh,fLSrange,nc), etype, nsd, -1);    % negative side
             dcr_neg = N*d(sctr);                           % crack nodes displacement (negative side)
             dcr([2*count-1,2*count]) = dcr_neg;
             count = count + 1;

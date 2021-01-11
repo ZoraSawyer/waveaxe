@@ -1,4 +1,4 @@
-function [ elem ] = FindElement(X)
+function [ elem ] = FindElement(X, SMesh)
 % Finds the element containing point X
 
 %   Input
@@ -8,8 +8,6 @@ function [ elem ] = FindElement(X)
 
 % Written by Matin Parchei Esfahani, University of Waterloo, June 2015
 % Last modified Oct. 2017.
-
-global SMesh
 
 ne = size(SMesh.conn,1);    % number of elements
 

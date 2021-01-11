@@ -1,4 +1,4 @@
-function [S,e] = ComputeStressatPoint(X,inputfield,e)
+function [S,e] = ComputeStressatPoint(X, inputfield, e, SMesh)
 %   COMPUTESTRESSATPOINT Computes stress at a given point, X, in the domain
 %
 %   Input
@@ -21,15 +21,12 @@ function [S,e] = ComputeStressatPoint(X,inputfield,e)
 % Written by Matin Parchei Esfahani, University of Waterloo, Sep. 2015
 % last modified Oct. 2017 (Version 2)
 
-
-global SMesh
-
 if nargin == 2                              % if element containing point X is not known
-    e = FindElement(X);                     % find element containing point X
+    e = FindElement(X, SMesh);                     % find element containing point X
 end
 
 enodes = SMesh.conn(e,:);                   % element connectivity
-sctr   = GetScatter(enodes);                % element DOFs
+sctr   = GetScatter(enodes, SMesh);                % element DOFs
 xI     = SMesh.nodes(enodes,:);             % element nodal coordinates
 
 if SMesh.Crnum(e)                           % if element contains the crack 
@@ -44,13 +41,13 @@ elseif strcmp(SMesh.type, 'Q9')
     fLSrange = 5:8;                         % range of normal LS for each element
 end
 
-xi = ParentCoordinates(X,SMesh.type,xI);    % global coordinates transfered to 2D parent coordinates
+xi = ParentCoordinates(X, SMesh.type, xI, SMesh.MeshForm);    % global coordinates transfered to 2D parent coordinates
 
 if size(inputfield,2) == 1                                      % input field is the displacement field, d (nDoF X 1).
     % computing actual stress values
-    D = SolidConstitutive(e);                                   % gives stress strain relation based on the constitutive law
+    D = SolidConstitutive(e, Material, SMesh, Domain);                                   % gives stress strain relation based on the constitutive law
     B = Bmatrix(xi, xI, enodes, SMesh.EnrType(enodes), ...
-        SMesh.eLS(e,fLSrange,crnum), SMesh.type);               % B matrix at point X
+        SMesh.eLS(e,fLSrange,crnum), SMesh.type, size(SMesh.nodes,2));               % B matrix at point X
     S = D*B*inputfield(sctr);                                   % S = [Sxx; Syy; Sxy]
     
 else % input field is the stress field, (3 X nnodes for 2D or 6 X nnodes for 3D)

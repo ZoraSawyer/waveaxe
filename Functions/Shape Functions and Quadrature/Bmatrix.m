@@ -1,4 +1,4 @@
-function [B,J] = Bmatrix(xi,xI,conn,enrnodes,fI,etype,sign)
+function [B, J] = Bmatrix(xi, xI, conn, enrnodes, fI, etype, nsd, sign)
 % BMATRIX Computes FEM/XFEM spatial darivatives and the corresponding Jacobian at a
 % given point of an element
 %
@@ -23,14 +23,11 @@ function [B,J] = Bmatrix(xi,xI,conn,enrnodes,fI,etype,sign)
 % Written by Matin Parchei Esfahani, University of Waterloo, Nov 2014
 % Last modified Oct. 2017 to include higher order elements. 
 
-global SMesh
-
-if nargin < 7
+if nargin < 8
     sign = 0;
 end
 
 nne  = size(conn,2);                    % number of nodes per element
-nsd  = size(SMesh.nodes,2);             % number of space dimensions
 enrH = length(find(enrnodes == 1));     % Number of nodes enriched by Heaviside function
 
 if any(enrnodes)                        % enriched nodes exist

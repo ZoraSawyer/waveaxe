@@ -1,14 +1,12 @@
-function D = SolidConstitutive(elem)
+function D = SolidConstitutive(elem, Material, SMesh, Domain)
 % SOLIDCONSTITUTIVE Defines the solid cosntitutive model for a given element 
 %
 %   Input
 %           elem : element
 %   Output
 %           D : Elasticity matrix
-
+% 
 % Written by Matin Parchei Esfahani, University of Waterloo, June 2015
-
-global Material SMesh Domain
 
 inc_sw = 0;
 if Domain.Inclusion_ON
