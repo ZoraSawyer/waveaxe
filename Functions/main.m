@@ -139,8 +139,11 @@ for np = 1:npulse
 
     % Initialize variables for pulse np
         % change output path to save keep pulse data separate
-        mkdir(iopath(1:end-1), ['pulse' num2str(np)])   % Creat new folder
-        IOPath = [iopath 'pulse' num2str(np) '\'];      % Change path
+        new_dir = fullfile(iopath(1:end-1), ['pulse' num2str(np)]);
+        if ~isfolder(new_dir)
+            mkdir(new_dir)
+        end
+        Control.OutPath = [iopath 'pulse' num2str(np) '\'];      % Change path
 
         dt = Control.Time.dtmin;                % time increament
         t0 = -dt;                               % initial time
