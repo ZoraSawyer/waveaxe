@@ -61,8 +61,7 @@ if strcmp(Mesh.Input, 'Gmsh')
         type = 'Q4';            % 4-node quadrilateral element
     elseif nne == 9
         type = 'Q9';            % 9-node quadrilateral element
-    end
-    
+    end   
 elseif strcmp(Mesh.Input,'Built-in')
     Lx = Domain.Lx;
     Ly = Domain.Ly;
@@ -183,7 +182,6 @@ for e=1:ne
 
     end
 end
-
 
 % defining material inclusions
 if Domain.Inclusion_ON
