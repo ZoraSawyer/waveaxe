@@ -91,7 +91,7 @@ while (iter <= max_iter) && ~converged
     
     if NR(iter) < res_tol % L2 norm of the residual
         converged = 1;       
-        fprintf(' CONVERGED');
+        fprintf(' CONVERGED\n');
     else
         
         % Solve the system of equations

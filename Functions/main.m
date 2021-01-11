@@ -272,5 +272,4 @@ for np = 1:npulse
     end
 end
 
-save([iopath 'CrackMesh.mat'],'CMesh')
 disp([num2str(toc),': End of analysis'])
