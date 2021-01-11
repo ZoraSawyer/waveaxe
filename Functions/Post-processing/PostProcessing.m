@@ -1,6 +1,6 @@
 function [SMesh, CMesh, Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] =...
     PostProcessing(Pvar, Pvar0, Pvar_1, stdDOFs, enrDOFs, Q, Q_avg,...
-    NR, t, n, save_on, dynamic_ON, dt, SMesh, CMesh, Domain, Control)
+    NR, t, n, save_on, dynamic_ON, dt, SMesh, CMesh, Material, Domain, Control)
 % POST PROCESSING Computes stress in solid, fluid flux
 % Checks for fracture propagation and updates fracture path if necessary
 % Writes data to output files
@@ -32,7 +32,7 @@ nsd = size(SMesh.nodes,2);                  % number of space dimensions
 % ========================= COMPUTE SOLID STRESS ==========================
 % Compute Nodal Stresses
 disp([num2str(toc),': Computing stress in solid'])
-S = ComputeNodalStress(Pvar(1:s_dof), SMesh);   % Compute stress at nodes
+S = ComputeNodalStress(Pvar(1:s_dof), SMesh, Material, Domain);   % Compute stress at nodes
 
 % in situ stress
 Sx  = Domain.InsituStress.Sx;   % in situ stress in x-direction
@@ -64,7 +64,7 @@ if norm(prop_dir) % fracture propagation
     Pvar0_old  = Pvar0;
     Pvar_1_old = Pvar_1;
     
-    [SMesh, CMesh] = PropagateCracks(prop_dir, n, t, SMesh, CMesh, Control.OutPath)       % Updating levelsets and enriched DOFs
+    [SMesh, CMesh] = PropagateCracks(prop_dir, n, t, SMesh, CMesh, Control.OutPath);       % Updating levelsets and enriched DOFs
                                            % based on the new fracture configuration
 
     enrDOFs = nsd*length(SMesh.EnrNodes);  % updating number of enriched DOFs

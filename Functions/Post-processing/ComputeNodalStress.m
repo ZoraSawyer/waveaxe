@@ -1,4 +1,4 @@
-function S = ComputeNodalStress(d, SMesh)
+function S = ComputeNodalStress(d, SMesh, Material, Domain)
 % COMPUTENODALSTRESS Returns a smooth matrix of nodal stresses
 %
 %   Input
