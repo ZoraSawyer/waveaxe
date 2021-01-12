@@ -9,10 +9,6 @@ function [nodes, conn] = LoadMesh(meshfile, nsd, InPath)
 % Output
 %       nodes      : coordinates of mesh nodes
 %       conn       : element connectivity
-%       left_edge  : connectivity of the left edge of the mesh
-%       right_edge : connectivity of the right edge of the mesh
-%       top_edge   : connectivity of the top edge of the mesh
-%       bot_edge   : connectivity of the bot edge of the mesh
 
 % Written by Matin Parchei Esfahani, University of Waterloo, Sep. 2017
 

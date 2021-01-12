@@ -22,16 +22,16 @@ tic
     disp([num2str(toc),': Loading Mesh and Config file...']);
     [SMesh, CMesh] = BuildMesh(SMesh, Domain, Control);
 
-
 %% Initialize variables
     % WB normal vectors at each node of the WB
-    n_WB = SMesh.nodes(WBnodes,:)-repmat(Domain.WB(1).center,length(WBnodes),1);
+    n_WB = SMesh.nodes(SMesh.WBnodes,:)...
+            - repmat(Domain.WB(1).center,length(SMesh.WBnodes),1);
     n_WB = n_WB ./ Domain.WB(1).radius;
 
     s_dof = stdDOFs + enrDOFs;              % total number of solid DoFs
-    fdof  = zeros(ncrack,1);                
+    fdof  = zeros(Domain.ncrack,1);                
     f_dof = 0;
-    for n = 1:ncrack
+    for n = 1:Domain.ncrack
         fdof(n) = size(CMesh(n).nodes,1);   % number of dofs of the n-th each crack
         f_dof   = f_dof + fdof(n);          % total number of fluid DoFs
     end
@@ -41,13 +41,13 @@ tic
            Domain.InsituStress.Sxy, Domain.InsituStress.Sy];
     p = zeros(f_dof,1);
     count = 0;
-    WB_node = zeros(ncrack,1);
-    L       = zeros(ncrack,1);
+    WB_node = zeros(Domain.ncrack,1);
+    L       = zeros(Domain.ncrack,1);
     Sn_max  = 0;
 
     p_hyd = Domain.GravityAcceleration * Domain.Depth * Material.fluid.rho; % Hydro-static pressure
 
-    for n = 1:ncrack   
+    for n = 1:Domain.ncrack   
         p(count+1:count+fdof(n)) = p_hyd;     % initial pressure in the n-th fracture
         count = count + fdof(n);
 
@@ -84,7 +84,7 @@ for np = 1:npulse
         
         % set initiation time for leak-off model
         if Domain.Leakoff_ON
-            for n = 1:ncrack
+            for n = 1:Domain.ncrack
                 CMesh(n).t0 = t*ones(1,length(CMesh(n).t0));
             end
         end
@@ -97,15 +97,15 @@ for np = 1:npulse
         Rw  = Domain.WB(1).radius;                       % Radius of the wellbore [m]
         E_p = E/(1-nu^2);                                % plain strain modulus [Pa]
 
-        Vinj = zeros(1,ncrack);
-        Vcr  = zeros(1,ncrack);
+        Vinj = zeros(1,Domain.ncrack);
+        Vcr  = zeros(1,Domain.ncrack);
 
         tend = Control.Time.tend;               % final time
         dynamic_ON = 0;                         % set initial analysis mode to static
 
-        p0t  = zeros(length(t:dt:tend),ncrack);
-        w0t  = zeros(length(t:dt:tend),ncrack);
-        Lt   = zeros(length(t:dt:tend),ncrack);
+        p0t  = zeros(length(t:dt:tend),Domain.ncrack);
+        w0t  = zeros(length(t:dt:tend),Domain.ncrack);
+        Lt   = zeros(length(t:dt:tend),Domain.ncrack);
         tn   = zeros(length(t:dt:tend),1);
 
     % Run through timesteps
@@ -119,18 +119,18 @@ for np = 1:npulse
             % updating fixed DoFs (EBC)
             count     = 0;
             count2    = 0;
-            tipdofs   = zeros(1,ncrack*2*nsd);
-            pressdofs = zeros(1,ncrack);
+            tipdofs   = zeros(1, Domain.ncrack*2*SMesh.nsd);
+            pressdofs = zeros(1, Domain.ncrack);
 
-            for n = 1:ncrack
+            for n = 1:Domain.ncrack
                 sctr = GetScatter(CMesh(n).smesh_tipedgenodes, SMesh);
-                tipdofs(count+1:count+2*nsd) = sctr(end-3:end);     % tip dofs of the n-th crack
+                tipdofs(count+1:count+2*SMesh.nsd) = sctr(end-3:end);     % tip dofs of the n-th crack
                 pressdofs(n) = s_dof + count2 + 1;                  % Wellbore pressure dof of the n-th crack
-                count = count + 2*nsd;
+                count = count + 2*SMesh.nsd;
                 count2 = count2 + fdof(n);
             end    
 
-            fixed_dofs = [top_edge_y, bot_edge_y, left_edge_x, right_edge_x, tipdofs, pressdofs];
+            fixed_dofs = [SMesh.top_edge_y, SMesh.bot_edge_y, SMesh.left_edge_x, SMesh.right_edge_x, tipdofs, pressdofs];
             
             iter_count  = 0;                        % iteration counter
             converged_Q = 0;                        % flow rate convergence indicator
@@ -146,7 +146,7 @@ for np = 1:npulse
 
             % pressure on well bore
             for i = 1:length(WBnodes)
-                fwb = Cwb * (pw*eye(nsd) + S0) * n_WB(i,:)';
+                fwb = Cwb * (pw*eye(SMesh.nsd) + S0) * n_WB(i,:)';
                 Force(WB_x(i)) = fwb(1);
                 Force(WB_y(i)) = fwb(2);
             end
@@ -174,7 +174,7 @@ for np = 1:npulse
         if ~prop
 
             if save_on
-               for n = 1:ncrack 
+               for n = 1:Domain.ncrack 
                     p0t(nt+1,n) = Pvar(pressdofs(n));           % wellbore pressure
                     w0t(nt+1,n) = CMesh(n).w(WB_node(n));       % wellbore aperture
                     tip         = CMesh(n).tip_nodes;           % tip nod of the crack mesh
