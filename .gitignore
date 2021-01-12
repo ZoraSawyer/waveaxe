@@ -1,2 +1,4 @@
 *.sublime*
 *.asv
+Project/AuxFiles/*
+Project/OutFiles/*

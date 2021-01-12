@@ -1,0 +1,686 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{todonotes}
+\usepackage{stmaryrd}
+\allowdisplaybreaks
+\usepackage[backend=biber,
+bibencoding=utf8,
+bibstyle=ieee,citestyle=numeric-comp,
+dashed=false,
+maxcitenames=2,
+mincitenames=1,
+date=year,
+doi=false,
+isbn=false,
+url=false, 
+]{biblatex}
+\addbibresource{unique.bib}
+
+\begin{document}
+	\title{Hydraulic fracturing with pressure pulses}
+	\maketitle
+Project steps:
+\begin{itemize}
+	\item Governing equations
+		\subitem Show that we don't need a pressure boundary condition$^1$ \checkmark
+		\subitem Non-dimensionalize the equations$^1$
+		\subitem Incorporate porous reservoir fluid$^4$
+	\item Implementation
+		\subitem Clean up the existing code$^1$
+		\subitem Make sure the same equations are being solved with the code$^1$
+		\subitem Implement porous media model$^4$
+	\item Verify the model
+		\subitem Run some quasi-static planar fracture growth models to verify with analytical solution$^1$
+		\subitem Verify porous media flow with results from the literature$^4$
+	\item Piston model
+		\subitem Model pressure pulses as step loads of constant injection$^1$
+		\subitem Compute injection rate of each pulse from piston model$^2$
+	\item Final report simulations
+		\subitem Select parameters$^1$
+		\subitem Set up config file for the report$^1$$^2$$^4$
+		\subitem Run simulation$^1$$^2$$^4$
+		\subitem Modify model until we have results we're happy with$^2$$^4$
+	\item Parameter study
+		\subitem Read through Ali's paper to see methodology$^1$
+		\subitem Decide on parameters to study$^1$
+		\subitem Select parameter range$^1$
+		\subitem Set up config files$^3$$^4$
+		\subitem Run simulations$^3$$^4$
+	\item Design charts$^3$
+	\item Report writing
+		\subitem Introduction$^1$
+		\subitem Methodology$^1$
+		\subitem Results: dynamic pressure pulsing, parameter study$^3$$^4$
+		\subitem Design charts$^3$$^4$
+		\subitem Conclusions$^4$
+\end{itemize}
+
+Project stages: 
+\begin{enumerate}
+	\item First pass at getting results
+	\item Figure out piston model that we're happy with
+	\item Parameter study and design charts
+	\item Porous media model
+\end{enumerate}
+
+\section{Governing Equations}
+
+\begin{equation}
+\nabla \cdot \boldsymbol\sigma = \mathbf{0}
+\end{equation}
+
+\begin{equation}
+\boldsymbol \sigma = \mathbb{C} \colon \boldsymbol \varepsilon 
+\end{equation}
+
+\begin{align}
+\mathbf{u}(\mathbf{x},t)\cdot \mathbf{n} &= 0 &\forall \: \mathbf{x} \in \Gamma_u, \: t \geq 0
+\\
+\boldsymbol\sigma \cdot \mathbf{n} &= p_w(t)\mathbf{n} &\forall \: \mathbf{x} \: \in \Gamma_w, \: t \geq 0
+\end{align}
+
+\begin{equation}
+w = \llbracket \mathbf{u}\rrbracket \cdot \mathbf{n}
+\end{equation}
+
+\begin{equation}
+\dfrac{\partial w}{\partial t} + \dfrac{\partial q}{\partial s} + Q_{leak}(s, t) = 0
+\end{equation}
+
+\begin{equation}
+q = \dfrac{-w^3}{12\mu}\dfrac{\partial p}{\partial s} 
+= -k \dfrac{\partial p}{\partial s}
+\end{equation}
+
+\begin{align}
+q(s_{inlet}) &= Q_{inj}(t)
+\\
+q(s_{tip}) &= 0
+\end{align}
+
+\subsection{Discrete equations}
+Semi-discretized rock deformation	
+\begin{equation}
+\label{eqn:solid-discrete}
+\begin{aligned}
+\underbrace{\left[\int\limits_{\Omega_s} \mathbf{B}^{\top} \mathbf{D} \mathbf{B} d\Omega \right] \mathbf{d}^n}_{\mathbf{F}^{int}}
+&+ 
+\underbrace{
+	\left[\int\limits_{\Gamma_{c}} \llbracket \mathbf{N} \rrbracket ^{\top} \left(t_c^n \mathbf{I} - \boldsymbol\sigma_0 \right) \hat{\mathbf{n}}_{\Gamma_c} d\Gamma \right]	
+}_{\mathbf{F}^{c}}
+- 
+\underbrace{\left[\int\limits_{\Gamma_{c}} \llbracket \mathbf{N} \rrbracket ^{\top} \hat{\mathbf{n}}_{\Gamma_c} p^n d\Gamma \right] 
+	 }_{\mathbf{F}^{p}}
+\\
+&- 
+\underbrace{\left[\int\limits_{\Gamma_w} \mathbf{N}^{\top} \left( p_w^n \hat{\mathbf{n}}_{w} + \boldsymbol\sigma_0\hat{\mathbf{n}}_{w} \right) d\Gamma \right]}_{\mathbf{F}^{ext}}
+= \mathbf{0}
+\end{aligned}
+\end{equation}
+
+Semi-discretized fluid flow
+	\begin{equation}
+\label{eqn:fluid-discrete}
+\begin{gathered}
+\underbrace{\left[\int\limits_{\Omega_c}
+	\mathbf{B}_f^\top q^n ds 
+	\right]}_{\mathbf{F}^d}
+-
+\dfrac{1}{\Delta t^n}
+\underbrace{\left[
+	\int\limits_{\Omega_c} \mathbf{N}_f^\top \Delta w^n ds 
+	\right]}_{\mathbf{F}^s}
+-
+\underbrace{\left[
+	\int\limits_{\Omega_c} \mathbf{N}_f^{\top} Q_{leak}^n ds
+	\right]}_{\mathbf{F}^l}
+	\\
+-
+\underbrace{\left[
+	\left(\mathbf{N}_f^{\top} Q_{inj} \right) \Big\rvert_{\Gamma_q} 
+	\right]}_{\mathbf{F}^f}
+= \mathbf{0} 
+\end{gathered}
+\end{equation}
+
+
+Define pressure and aperture: 
+\begin{align}
+	w &= \hat{\mathbf{n}}_{\Gamma_c}^{\top} \llbracket\mathbf{N}\rrbracket \mathbf{d}
+	\\
+	p &= \mathbf{N}_f \mathbf{p}
+\end{align}
+
+The fluid flux is defined with the cubic law as
+\begin{equation}
+q = -k \mathbf{B}_f \mathbf{p}
+\end{equation}
+
+The wellbore pressure is defined as
+\begin{equation}
+	p_w = \bar{\mathbf{I}}_1^{\top} \mathbf{p}
+\end{equation}
+in which $\bar{\mathbf{I}}_1$ is a column matrix with the only non-zero component is the first component (1).
+
+Discretized rock deformation	
+\begin{equation}
+\begin{aligned}
+\underbrace{\left[\int\limits_{\Omega_s} \mathbf{B}^{\top} \mathbf{D} \mathbf{B} d\Omega \right] \mathbf{d}^n}_{\mathbf{F}^{int}}
+&+ 
+\underbrace{
+	\left[\int\limits_{\Gamma_{c}} \llbracket \mathbf{N} \rrbracket ^{\top} \left(t_c^n \mathbf{I} - \boldsymbol\sigma_0 \right)\hat{\mathbf{n}}_{\Gamma_c} d\Gamma \right]	
+}_{\mathbf{F}^{c}}
+- 
+\underbrace{\left[\int\limits_{\Gamma_{c}} \llbracket \mathbf{N} \rrbracket ^{\top} \hat{\mathbf{n}}_{\Gamma_c} \mathbf{N}_f d\Gamma \right] \mathbf{p}^n
+}_{\mathbf{F}^{p}}
+\\
+&- 
+\underbrace{\left[\int\limits_{\Gamma_w} \mathbf{N}^{\top} \hat{\mathbf{n}}_{w} d\Gamma \:
+\bar{\mathbf{I}}^{\top}\mathbf{p}^n
++ 
+\int\limits_{\Gamma_w} \mathbf{N}^{\top} \boldsymbol\sigma_0\hat{\mathbf{n}}_{w} d\Gamma
+ \right]}_{\mathbf{F}^{ext}}
+= \mathbf{0}
+\end{aligned}
+\end{equation}
+
+
+Discretized fluid flow
+\begin{equation}
+\begin{gathered}
+\underbrace{\left[\int\limits_{\Omega_c}
+	\mathbf{B}_f^\top k^n \mathbf{B}_f ds \right] \mathbf{p}^n
+	}_{\mathbf{F}^d}
++
+\dfrac{1}{\Delta t^n}
+\underbrace{\left[
+	\int\limits_{\Omega_c} \mathbf{N}_f^\top (w^n - w^{n-1})  ds 
+	\right]}_{\mathbf{F}^s}
++
+\underbrace{\left[
+	\int\limits_{\Omega_c} \mathbf{N}_f^{\top} Q_{leak}^n ds
+	\right]}_{\mathbf{F}^l}
+	\\
++
+\underbrace{\left[
+	\left(\mathbf{N}_f^{\top} Q_{inj}^n \right) \Big\rvert_{\Gamma_q} 
+	\right]}_{\mathbf{F}^f}
+= \mathbf{0} 
+\end{gathered}
+\end{equation}
+
+
+Coupled system: 
+	\begin{equation}
+\begin{aligned}
+\mathbf{R}_d^n &= \mathbf{F}^{int}(\mathbf{d}^n) 
++ \mathbf{F}^{c}(\mathbf{d}^n) 
+- \mathbf{F}^{p}(\mathbf{p}^n) 
+- \mathbf{F}^{ext}(\mathbf{p}^n) = \mathbf{0}\\
+\mathbf{R}_p^n &= \mathbf{F}^{d}(\mathbf{d}^n, \mathbf{p}^n, \boldsymbol{\phi}^n) 
++ \dfrac{1}{\Delta t} \mathbf{F}^{s}(\Delta\mathbf{d}, \Delta \boldsymbol\phi)
++\mathbf{F}^{l} 
++ \mathbf{F}^{f} = \mathbf{0}
+\end{aligned}
+\label{eqn:system}
+\end{equation}
+
+\section{Matrix form}
+
+Discretized rock deformation	
+\begin{equation}
+\begin{aligned}
+\underbrace{\left[\int\limits_{\Omega_s} \mathbf{B}^{\top} \mathbf{D} \mathbf{B} d\Omega \right] \mathbf{d}^n}_{\mathbf{F}^{int} = \mathbf{K}_{dd} \mathbf{d}^n}
+&+ 
+\underbrace{
+	\left[\int\limits_{\Gamma_{c}} \llbracket \mathbf{N} \rrbracket^{\top} \hat{\mathbf{n}}_{\Gamma_c} \dfrac{\partial t_c^n}{\partial w^n} \hat{\mathbf{n}}_{\Gamma_c}^{\top}\llbracket \mathbf{N} \rrbracket 
+	  d\Gamma \right]	\mathbf{d}^n
+}_{\mathbf{F}^{c} = \mathbf{K}_c \mathbf{d}^n}
++ 
+\underbrace{
+	\left[\int\limits_{\Gamma_{c}} \llbracket \mathbf{N} \rrbracket^{\top} 
+	\left( t_{c_0}^n \mathbf{I} - \boldsymbol\sigma_0   \right) \hat{\mathbf{n}}_{\Gamma_c}
+	d\Gamma \right]
+}_{\mathbf{F}^{c0}}
+\\
+- 
+\underbrace{\left[\int\limits_{\Gamma_{c}} \llbracket \mathbf{N} \rrbracket ^{\top} \hat{\mathbf{n}}_{\Gamma_c} \mathbf{N}_f d\Gamma \right] \mathbf{p}^n
+}_{\mathbf{F}^{p} = \mathbf{K}_{dp} \mathbf{p}^n}
+&- 
+\underbrace{\left[\int\limits_{\Gamma_w} \mathbf{N}^{\top} \hat{\mathbf{n}}_{w} d\Gamma \:
+	\bar{\mathbf{I}}^{\top} \right]\mathbf{p}^n
+}_{\mathbf{F}^{ep} = \mathbf{K}_{ep} \mathbf{p}^n}
+	-
+\underbrace{\left[
+	\int\limits_{\Gamma_w} \mathbf{N}^{\top} \boldsymbol\sigma_0\hat{\mathbf{n}}_{w} d\Gamma
+\right]
+}_{\mathbf{F}^{ext}}
+= \mathbf{0}
+\end{aligned}
+\end{equation}
+
+This form assumes that $t_c^n$ is a linear function of $w^n$ such that $t_c^n = t_{c_0} + (dt_c/dw) w$
+\begin{equation}
+	t_c^n = 
+	\begin{cases}
+		k_1 w^n & w^n < w_w \\
+		(f_u - k_2 w_w) + k_2 w & w_w < w < w_c \\
+		0 & w > w_c
+	\end{cases}
+\end{equation}
+
+in which $k_1 = f_u/w_w$ and $k_2 = -f_u/(w_c - w_w)$.
+\begin{equation}
+t_{c_0}^n = 
+\begin{cases}
+(f_u - k_2 w_w) & w_w < w < w_c \\
+0 & \text{otherwise}
+\end{cases}
+\end{equation}
+
+and 
+\begin{equation}
+\dfrac{dt_c}{dw} = 
+\begin{cases}
+k_1 & w^n < w_w \\
+k_2 & w_w < w < w_c \\
+0 & w > w_c
+\end{cases}
+\end{equation}
+
+The only issue is that $t_{c_0}$ and $dt_c/dw$ are dependent on $w$ as well in the piecewise linear form. 
+This isn't a smooth formulation.
+
+Discretized fluid flow
+\begin{equation}
+\begin{gathered}
+\underbrace{\left[\int\limits_{\Omega_c}
+	\mathbf{B}_f^\top k \mathbf{B}_f ds 
+	\right] \mathbf{p}^n}_{\mathbf{F}^d = \mathbf{K}_{pp} \mathbf{p}^n}
++
+\dfrac{1}{\Delta t^n}
+\underbrace{\left[
+	\int\limits_{\Omega_c} \mathbf{N}_f^\top \hat{\mathbf{n}}_{\Gamma_c}^{\top}\llbracket \mathbf{N} \rrbracket  ds 
+	\right] \mathbf{d}^n}_{\mathbf{F}^s = \mathbf{K}_{sd} \mathbf{d}^n}
+- 
+\dfrac{1}{\Delta t^n}
+\underbrace{\left[
+	\int\limits_{\Omega_c} \mathbf{N}_f^\top w^{n-1} ds 
+	\right]}_{\mathbf{F}^{s0}}
+	\\
++
+\underbrace{\left[
+	\int\limits_{\Omega_c} \mathbf{N}_f^{\top} Q_{leak}^n ds
+	\right]}_{\mathbf{F}^l}
++
+\underbrace{\left[
+	\left(\mathbf{N}_f^{\top} Q_{inj} \right) \Big\rvert_{\Gamma_q} 
+	\right]}_{\mathbf{F}^f}
+= \mathbf{0} 
+\end{gathered}
+\end{equation}
+
+\begin{equation}
+\begin{aligned}
+\mathbf{R}_d^n &= \mathbf{K}_{dd} \mathbf{d}^n 
++ \mathbf{K}_{c} \mathbf{d}^n  
+- \mathbf{K}_{dp} \mathbf{p}^n 
+- \mathbf{K}_{ep} \mathbf{p}^n 
++ \left(\mathbf{F}^{c0}
+- \mathbf{F}^{ext} \right) = \mathbf{0}
+\\
+\mathbf{R}_p^n &= \mathbf{K}_{pp} \mathbf{p}^n
++ \dfrac{1}{\Delta t} \mathbf{K}_{sd} \mathbf{d}^n
++ \left(\mathbf{F}^{l} 
++ \mathbf{F}^{f} 
+-\mathbf{F}^{s0}\right) = \mathbf{0}
+\end{aligned}
+\end{equation}
+
+In matrix form:
+\begin{equation}
+	\begin{bmatrix}
+		\mathbf{K}_{dd} + \mathbf{K}_{c} &
+		 - \mathbf{K}_{dp} - \mathbf{K}_{ep} 
+		\\
+		\dfrac{1}{\Delta t} \mathbf{K}_{sd} &
+		\mathbf{K}_{pp}
+	\end{bmatrix}
+	\begin{bmatrix}
+	\mathbf{d}^n
+	\\
+	\mathbf{p}^n
+	\end{bmatrix} 
+	=
+	\begin{bmatrix}
+	\mathbf{F}^{ext} -\mathbf{F}^{c0}
+	\\
+	\mathbf{F}^{s0}
+	-\mathbf{F}^{l} 
+	-\mathbf{F}^{f} 
+	\end{bmatrix}
+\end{equation}
+
+Simplifying terms:
+\begin{equation}
+\begin{bmatrix}
+\mathbf{K}_{d} &
+- \mathbf{K}_{p} 
+\\
+\mathbf{K}_{sd} &
+\Delta t \mathbf{K}_{pp} 
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf{d}^n
+\\
+\mathbf{p}^n
+\end{bmatrix} 
+=
+\begin{bmatrix}
+\mathbf{F}^{ext,d}
+\\
+\mathbf{F}^{ext,p} 
+\end{bmatrix}
+	\label{eqn:coupled}
+\end{equation}
+
+\section{Uniqueness}
+
+The proppant concentration is completely uncoupled in the section above, therefore we will exclude it from the proof. 
+Following the proof by \textcite{gupta_coupled_2016}.
+
+\begin{equation}
+	\mathbf{K}_{coupled} = 
+	\begin{bmatrix}
+		\mathbf{K}_{d} &
+		- \mathbf{K}_{p} 
+		\\
+		\mathbf{K}_{sd} &
+		\Delta t \mathbf{K}_{pp} 
+	\end{bmatrix}
+\end{equation}
+
+\paragraph{Lemma}
+
+Vectors $-\mathbf{K}_{p}\mathbf{p} = -(\mathbf{K}_{dp} + \mathbf{K}_{ep})\mathbf{p}$ and  $\mathbf{p}^{\top}\mathbf{K}_{sd}$ are non-zero for any non-zero vector $\mathbf{p}$.
+
+\paragraph{Proof}
+Vector $\mathbf{K}_{dp}\mathbf{p}$ represents the load on the crack surfaces corresponding to fluid pressure. 
+Physcially, this load vector is non-zero for any non-zero pressure distribution on the crack faces.
+
+Vector $\mathbf{K}_{ep}\mathbf{p}$ represents the load on the wellbore corresponding to the wellbore fluid pressure. 
+Physically, this load vector is also non-zero for any non-zero wellbore pressure. 
+
+The vector $\mathbf{K}_{sd}$ is equivalent to the transpose of $\mathbf{K}_{dp}$. 
+This means that the vector $\mathbf{p}^{\top}\mathbf{K}_{sd}=\mathbf{K}_{dp} \mathbf{p}$ is also non-zero for any non-zero pressure distribution on the crack faces. 
+
+Note that these vectors are nonzero vectors, but may have some zero terms. 
+
+\paragraph{Theorem}
+The coupled system of equations given by Equation \ref{eqn:coupled} has a unique solution if rigid body motions of the reservoir are prevented.
+
+\paragraph{Proof}
+The first set of equations in (\ref{eqn:coupled}) gives
+\begin{equation}
+	\mathbf{d} = \mathbf{K}_{d}^{-1}
+	\left[
+	\mathbf{F}^{ext,d} 
+	+ \mathbf{K}_{p} \mathbf{p}
+	\right]
+	\label{eqn:d}
+\end{equation}
+
+Substituting this into the second set of equations in (\ref{eqn:coupled}) leads to
+
+\begin{equation}
+\begin{gathered}
+	\Delta t\mathbf{K}_{pp} \mathbf{p}^n
+	+ \mathbf{K}_{sd}\left \lbrace \mathbf{K}_{d}^{-1}
+	\left[
+	\mathbf{F}^{ext,d}
+	+ \mathbf{K}_{p} \mathbf{p}
+	\right]\right \rbrace
+	- \mathbf{F}^{ext,p} = \mathbf{0}
+	\\
+	\Delta t \mathbf{K}_{pp} \mathbf{p}^n
+	+ \mathbf{K}_{sd} \mathbf{K}_{d}^{-1}
+	\mathbf{F}^{ext,d}
+	+ \mathbf{K}_{sd} \mathbf{K}_{d}^{-1} \mathbf{K}_{p} \mathbf{p}
+	- \mathbf{F}^{ext,p} = \mathbf{0}
+	\\
+	\underbrace{\left(\Delta t \mathbf{K}_{pp} + \mathbf{K}_{sd} \mathbf{K}_{d}^{-1} \mathbf{K}_{p} \right)}_{\mathbf{S}_k}
+	\mathbf{p}^n
+	= \mathbf{F}^{ext,p}
+	- \mathbf{K}_{sd} \mathbf{K}_{d}^{-1}
+	\mathbf{F}^{ext,d} 
+\end{gathered}
+\label{eqn:p}
+\end{equation}
+
+in which $\mathbf{S}_k$ is the Schur complement of $\mathbf{K}_{d}$ in $\mathbf{K}_{coupled}$. 
+
+Sub-matrix $\mathbf{K}_{d}$ is positive definite if rigid body motions of the reservoir are prevented.
+Thus, this proves nonsingularity of $\mathbf{K}_{d}$ and Equation \ref{eqn:d} gives a unique solution for $\mathbf{d}$. 
+
+Similarly, Equation \ref{eqn:p} gives a unique solution for $\mathbf{p}$ if the Schur complement, $\mathbf{S}_k$ is positive definite. 
+To prove that, pre- and post- multiply the Schur complement by an arbitrary non-zero vector, $\mathbf{p}$, 
+
+\begin{equation}
+\begin{aligned}
+	\mathbf{p}^{\top} \mathbf{S}_k \mathbf{p} &= 
+\mathbf{p}^{\top} \left(\Delta t\mathbf{K}_{pp} + \mathbf{K}_{sd} \mathbf{K}_{d}^{-1} \mathbf{K}_{p} \right) \mathbf{p}
+\\
+&= 
+\mathbf{p}^{\top} \Delta t\mathbf{K}_{pp} \mathbf{p}
++
+\mathbf{p}^{\top} \mathbf{K}_{sd} \mathbf{K}_{d}^{-1} \mathbf{K}_{p} \mathbf{p}
+\\
+&= 
+\mathbf{p}^{\top} \Delta t\mathbf{K}_{pp} \mathbf{p}
++
+\mathbf{p}^{\top} \mathbf{K}_{dp}^{\top} \mathbf{K}_{d}^{-1} \left(\mathbf{K}_{dp} + \mathbf{K}_{ep}\right) \mathbf{p}
+\\
+&=
+\mathbf{p}^{\top} \Delta t\mathbf{K}_{pp} \mathbf{p}
++
+\left(\mathbf{p}^{\top} \mathbf{K}_{dp}^{\top}\right) \mathbf{K}_{d}^{-1} \left(\mathbf{K}_{dp} \mathbf{p}\right)
++
+\mathbf{p}^{\top} \left( \mathbf{K}_{dp}^{\top} \mathbf{K}_{d}^{-1} \mathbf{K}_{ep} \right) \mathbf{p}
+\end{aligned}
+\end{equation}
+
+The Schur complement is positive definite if $\mathbf{p}^{\top} \mathbf{S}_k \mathbf{p}$ is greater than zero.
+The term $\mathbf{p}^{\top} \Delta t\mathbf{K}_{pp} \mathbf{p}$ is greater than or equal to zero for all non-zero $\Delta t$ and non-zero vector $\mathbf{p}$ because $\mathbf{K}_{pp}$ is positive semi-definite.
+
+Because $\mathbf{K}_{d}^{-1}$ is positive definite and $\mathbf{K}_{dp} \mathbf{p}$ is non-zero, the second term $\mathbf{p}^{\top} \mathbf{K}_{dp} \mathbf{K}_{d}^{-1} \mathbf{K}_{dp} \mathbf{p}$ is greater than zero for any non-zero vector $\mathbf{p}$.
+
+The last term is asymmetric, but still non-zero as long as $\mathbf{p}^{\top} \mathbf{K}_{dp}^{\top}$ and $\mathbf{K}_{ep} \mathbf{p}$ are non-zero. The first vector has already been shown to be non-zero, and the second vector is non-zero as long as the inlet pressure, $p_w$ is non-zero.
+Thus, the solution of the coupled system of equations is unique if rigid body motions of the reservoir are prevented.
+
+\section{Linearization}
+Linearization
+\begin{equation}
+\mathbf{R}^n_m + \mathbf{J}^n_m \Delta \boldsymbol{\psi}^n_m = \mathbf{0}
+\end{equation}
+
+Jacobian 
+\begin{equation}
+\mathbf{J}^n_m = 
+\begin{bmatrix}
+\dfrac{\partial \mathbf{R}_d^n}{\partial \mathbf{d}^n}
+& 
+\dfrac{\partial \mathbf{R}_d^n}{\partial \mathbf{p}^n}
+\\[1.2em]
+\dfrac{\partial \mathbf{R}_p^n}{\partial \mathbf{d}^n}
+& 
+\dfrac{\partial \mathbf{R}_p^n}{\partial \mathbf{p}^n}
+\end{bmatrix}_m
+= \begin{bmatrix}
+\mathbf{K}_{dd} + \mathbf{K}_{cd}
+& 
+-\mathbf{K}_{dp} - \mathbf{K}_{ep}
+\\[1.2em]
+\Delta t\mathbf{K}_{pd} + \mathbf{K}_{sd}
+& 
+\Delta t\mathbf{K}_{pp}
+\end{bmatrix}^n_m
+\end{equation}	
+
+The terms in the matrix are
+\begin{align}
+	\mathbf{K}_{dd} &= \dfrac{\partial \mathbf{F}^{int}}{\partial \mathbf{d}^n}  
+	= \int\limits_{\Omega} \mathbf{B}^{\top} \mathbf{D} \mathbf{B} d\Omega
+	\\[1.2em]
+	\mathbf{K}_{cd} &= \dfrac{\partial \mathbf{F}^{c}}{\partial \mathbf{d}^n} 	
+	= \dfrac{\partial \mathbf{F}^{c}}{\partial t_c} \dfrac{\partial t_c}{\partial w} 
+	\dfrac{\partial w}{\partial \mathbf{d}^n} \nonumber
+	\\
+	&=\left[\int\limits_{\Gamma_{c}} \llbracket\mathbf{N}\rrbracket ^{\top} \hat{\mathbf{n}}_{\Gamma_c} 
+	\dfrac{\partial t_c}{\partial w}  \hat{\mathbf{n}}_{\Gamma_c}^\top \llbracket \mathbf{N} \rrbracket  d\Gamma \right]
+	\\[1.2em]
+	\mathbf{K}_{dp} &= \dfrac{\partial \mathbf{F}^{p}}{\partial \mathbf{p}^n}
+	= \int\limits_{\Gamma_{c}} \llbracket \mathbf{N} \rrbracket^{\top} \hat{\mathbf{n}}_{\Gamma_c} \mathbf{N}_f d\Gamma 
+	\\[1.2em]
+	\mathbf{K}_{ep} &= \dfrac{\partial \mathbf{F}^{ext}}{\partial \mathbf{p}^n}
+	= \int\limits_{\Gamma_w} \mathbf{N}^{\top} \hat{\mathbf{n}}_{w} d\Gamma \:
+	\bar{\mathbf{I}}_1^{\top}
+	\\[1.2em]
+	\mathbf{K}_{pd} &= \dfrac{\partial \mathbf{F}^d}{\partial \mathbf{d}^n}   
+	= \dfrac{\partial \mathbf{F}^d}{\partial k}
+	\dfrac{\partial k}{\partial w} 
+	\dfrac{\partial w}{\partial \mathbf{d}^n} \nonumber
+	\\
+	&=  \left[\int\limits_{\Omega_f}
+	\mathbf{B}_f^{\top}
+	\dfrac{\partial k}{\partial w}  \mathbf{B}_f \mathbf{p}^n \hat{\mathbf{n}}_{\Gamma_c}^\top \llbracket \mathbf{N} \rrbracket ds \right] 		
+	\\[1.2em]
+	\mathbf{K}_{sd} &= 
+	\dfrac{\partial \mathbf{F}^s}{\partial \mathbf{d}^n} 
+	= \dfrac{\partial \mathbf{F}^s}{\partial w^n} \dfrac{\partial w^n}{\partial \mathbf{d}^n} \nonumber
+	\\
+	&= \int\limits_{\Omega_f} \mathbf{N}_f^{\top} \hat{\mathbf{n}}_{\Gamma_c}^{\top} \llbracket \mathbf{N} \rrbracket ds
+	\\[1.2em]
+	\mathbf{K}_{pp} &= \dfrac{\partial \mathbf{F}^{d}}{\partial \mathbf{p}^n}
+	= \dfrac{\partial \mathbf{F}^{d}}{\partial q}
+	\dfrac{\partial q}{\partial \mathbf{p}^n} \nonumber
+	\\
+	&= \left[\int\limits_{\Omega_f} \mathbf{B}_f^{\top} k\mathbf{B}_f ds \right] 
+\end{align}
+
+
+The differential terms in the integrals are specified as,
+\begin{align}
+	\dfrac{\partial t_c}{\partial w}&= \begin{cases}
+		\dfrac{f_u}{w_w}, & w < w_w
+		\\[1.2em]
+		\dfrac{-f_u}{w_c-w_w}, & w_w < w < w_c
+		\\[1.2em]
+		0, & w > w_c
+	\end{cases}
+	\\[1.2em]
+	\dfrac{\partial k}{\partial w} &= \dfrac{w^2}{4 \mu}
+\end{align}
+
+Newton-Raphson iterative method
+
+\begin{equation}
+\boldsymbol{\psi}^{n}_{m} = \boldsymbol{\psi}^{n}_{m-1} + \Delta \boldsymbol{\psi}^{n}_{m-1}
+\label{eqn:solve}
+\end{equation}
+
+Convergence criteria
+
+\begin{equation}
+\lVert \mathbf{R}^n_m \rVert \leq \epsilon_{tol,a} 
+\quad \text{or} \quad 
+\lVert\mathbf{R}^n_m \rVert \leq \epsilon_{tol,b} \lVert \mathbf{R}^n_1 \rVert
+\label{eqn:conv-criteria}
+\end{equation}
+
+% \section{Uniqueness of Linearized Form}
+
+% \begin{equation}
+% 	\begin{bmatrix}
+% 	\mathbf{R}_d \\[1.2em]
+% 	\mathbf{R}_p 
+% 	\end{bmatrix}
+% 	+ 
+% 	\begin{bmatrix}
+% 	\mathbf{K}_{dd} + \mathbf{K}_{cd}
+% 	& 
+% 	-\mathbf{K}_{dp} - \mathbf{K}_{ep}
+% 	\\[1.2em]
+% 	\Delta t\mathbf{K}_{pd} +\mathbf{K}_{sd}
+% 	& 
+% 	\Delta t\mathbf{K}_{pp}
+% 	\end{bmatrix}
+% 	\begin{bmatrix}
+% 	\Delta\mathbf{d} \\[1.2em]
+% 	\Delta\mathbf{p}
+% 	\end{bmatrix}
+% 	=
+% 	\mathbf{0}
+% \end{equation}
+
+% Simplify as
+% \begin{equation}
+% \begin{bmatrix}
+% \mathbf{K}_{d}
+% & 
+% -\mathbf{K}_{p}
+% \\[1.2em]
+% \mathbf{K}_{p2}
+% & 
+% \mathbf{K}_{pp}
+% \end{bmatrix}
+% \begin{bmatrix}
+% \Delta\mathbf{d} \\[1.2em]
+% \Delta\mathbf{p} 
+% \end{bmatrix}
+% =
+% \begin{bmatrix}
+% -\mathbf{R}_d \\[1.2em]
+% -\mathbf{R}_p 
+% \end{bmatrix}
+% \end{equation}
+
+% From the first equation, 
+
+% \begin{gather}
+% 	\mathbf{K}_{d}\Delta\mathbf{d} 
+% 	- \mathbf{K}_{p} \Delta\mathbf{p} 
+% 	= -\mathbf{R}_d
+% 	\\
+% 	\Delta\mathbf{d} = \mathbf{K}_{d}^{-1} \left(-\mathbf{R}_d + \mathbf{K}_{p} \Delta\mathbf{p} \right)
+% 	\\
+% 	\Delta\mathbf{d} = -\mathbf{K}_{d}^{-1} \mathbf{R}_d + \mathbf{K}_{d}^{-1}\mathbf{K}_{p} \Delta\mathbf{p}
+% \end{gather}
+
+% This yields a unique solution so long as $\mathbf{K}_{d}=\mathbf{K}_{dd} + \mathbf{K}_{cd}$ is invertible, proven by positive definiteness.
+% This is true as long as rigid body motions are restrained. 
+
+% Substituting into the second equation yields
+% \begin{gather}
+% 	\mathbf{K}_{p2}\Delta\mathbf{d} 
+% 	+ \mathbf{K}_{pp}\Delta \mathbf{p} 
+% 	= -\mathbf{R}_p
+% 	\\
+% 	\mathbf{K}_{pd2}\left(-\mathbf{K}_{d}^{-1} \mathbf{R}_d + \mathbf{K}_{d}^{-1}\mathbf{K}_{p} \Delta \mathbf{p}\right) 
+% 	+ \mathbf{K}_{pp} \Delta \mathbf{p} 
+% 	= -\mathbf{R}_p
+% 	\\
+% 	-\mathbf{K}_{pd2}\mathbf{K}_{d}^{-1} \mathbf{R}_d 
+% 	+ \mathbf{K}_{pd2}\mathbf{K}_{d}^{-1}\mathbf{K}_{p}\Delta\mathbf{p} 
+% 	+ \mathbf{K}_{pp} \Delta \mathbf{p} 
+% 	=-\mathbf{R}_p
+% 	\\ 
+% 	\underbrace{\left(\mathbf{K}_{pd2}\mathbf{K}_{d}^{-1}\mathbf{K}_{p}+ \mathbf{K}_{pp}  \right)}_{\mathbf{S}_k}\Delta \mathbf{p} 
+% 	= \mathbf{K}_{pd2}\mathbf{K}_{d}^{-1} \mathbf{R}_d -\mathbf{R}_p 
+% \end{gather}
+
+% This yields a unique solution so long as $\mathbf{S}_k = \mathbf{K}_{pd2}\mathbf{K}_{d}^{-1}\mathbf{K}_{p}+ \mathbf{K}_{pp} $ is invertible. Same as above, we prove this by showing that $\mathbf{p}^{\top}\mathbf{S}_k\mathbf{p}$ is greater than zero.
+
+
+\end{document}
