@@ -20,75 +20,8 @@ tic
 
 %% Build mesh
     disp([num2str(toc),': Loading Mesh and Config file...']);
-    
     [SMesh, CMesh] = BuildMesh(SMesh, Domain, Control);
 
-    nsd = size(SMesh.nodes,2);              % number of space dimensions
-    ncrack = size(CMesh,2);                 % number of cracks
-
-%% Define node sets and DOF sets
-    % Edge nodes of the domain
-    left_nodes  = find(SMesh.nodes(:,1) == 0);          % left nodes
-    right_nodes = find(SMesh.nodes(:,1) == SMesh.Lx);   % right nodes
-    bot_nodes   = find(SMesh.nodes(:,2) == 0);          % bottom nodes
-    top_nodes   = find(SMesh.nodes(:,2) == SMesh.Ly);   % top nodes
-
-    % Left edge DoFs
-    sctr = GetScatter(left_nodes, SMesh);
-    left_edge_x = sctr(1:2:end-1);          % x-DoFs
-    left_edge_y = sctr(2:2:end);            % y-DoFs
-
-    % Right edge DoFs
-    sctr = GetScatter(right_nodes, SMesh);
-    right_edge_x = sctr(1:2:end-1);         % x-DoFs
-    right_edge_y = sctr(2:2:end);           % y-DoFs
-
-    % Top edge DoFs
-    sctr = GetScatter(top_nodes, SMesh);
-    top_edge_x = sctr(1:2:end-1);           % x-DoFs
-    top_edge_y = sctr(2:2:end);             % y-DoFs
-
-    % Bottom edge DoFs
-    sctr = GetScatter(bot_nodes, SMesh);
-    bot_edge_x = sctr(1:2:end-1);           % x-DoFs
-    bot_edge_y = sctr(2:2:end);             % y-DoFs
-
-
-    % Corner nodes of the domain
-    LL = find(SMesh.nodes(:,1) == 0        & SMesh.nodes(:,2) == 0);           % lower left corner
-    LR = find(SMesh.nodes(:,1) == SMesh.Lx & SMesh.nodes(:,2) == 0);           % lower right corner
-    UR = find(SMesh.nodes(:,1) == SMesh.Lx & SMesh.nodes(:,2) == SMesh.Ly);    % upper right corner
-    UL = find(SMesh.nodes(:,1) == 0        & SMesh.nodes(:,2) == SMesh.Ly);    % upper left corner
-
-    % lower left corner DoFs
-    sctr = GetScatter(LL, SMesh);
-    LL_x = sctr(1);                         % x-DoF
-    LL_y = sctr(2);                         % y-DoF
-
-    % lower right corner DoFs
-    sctr = GetScatter(LR, SMesh);
-    LR_x = sctr(1);                         % x-DoF
-    LR_y = sctr(2);                         % y-DoF
-
-    % upper right corner DoFs
-    sctr = GetScatter(UR, SMesh);
-    UR_x = sctr(1);                         % x-DoF
-    UR_y = sctr(2);                         % y-DoF
-
-    % upper left corner DoFs
-    sctr = GetScatter(UL, SMesh);
-    UL_x = sctr(1);                         % x-DoF
-    UL_y = sctr(2);                         % y-DoF
-
-    % Wellbore DoFs
-    WBnodes = find(SMesh.WBnodes == 1);
-    sctr = GetScatter(WBnodes, SMesh);
-    sctr = sctr(1:nsd*length(WBnodes));     % standard DoFs
-    WB_x = sctr(1:2:end-1);                 % x-DoF
-    WB_y = sctr(2:2:end);                   % y-DoF
-
-    stdDOFs = size(SMesh.nodes,1)*nsd;      % number of standard DoFs
-    enrDOFs = length(SMesh.EnrNodes)*nsd;   % number of enriched DoFs
 
 %% Initialize variables
     % WB normal vectors at each node of the WB
