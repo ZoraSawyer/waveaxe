@@ -23,11 +23,11 @@ function [Nv,dNdxi]=LagrangeBasis(type,coord,dim)
 % Department of Mechanical Engineering 
 % Northwestern University    
     
-if ( nargin == 2 )
-    dim=1;
-end
+    if ( nargin == 2 )
+        dim=1;
+    end
   
-switch type
+    switch type
     case 'L2'  
     %%%%%%%%%%%%%%%%%%%%% L2 TWO NODE LINE ELEMENT %%%%%%%%%%%%%%%%%%%%% 
     %  
@@ -362,15 +362,16 @@ switch type
     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   otherwise
+    otherwise
     disp(['ERROR in LagrangeBasis: Element ',type,' not yet supported'])
     N=[]; dNdxi=[];
-  end
+    end
  
   I = eye(dim);
-  Nv = [];
-  for i = 1:size(N,1)
-    Nv = [Nv;I*N(i)];
+  nn = size(N, 1);
+  Nv = zeros(dim*nn, dim);
+  for i = 1:nn
+    Nv((i-1)*dim+1:i*dim, :) = I*N(i);
   end
 
 end
