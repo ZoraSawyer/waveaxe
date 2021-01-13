@@ -1,5 +1,5 @@
 function [Pvar, q, NR, NRs, NRf, converged] = ...
-    NRiter(Force, t, dt, ndof_s, ndof_c, fixed_dofs, Pvar0, Pvar_1, ...
+    NRiter(Force, t, dt, fixed_dofs, Pvar0, Pvar_1, ...
         dynamic_ON, SMesh, CMesh, Material, Control, Domain)
 %NRITER Newton-Raphson iterative process: Solves the nonlinear coupled system of 
 % equations for simulation of HF. Solves F(x)-f = 0
@@ -7,8 +7,6 @@ function [Pvar, q, NR, NRs, NRf, converged] = ...
 %                           q       ]   % fluid flux vector
 %           t         : current time
 %           dt        : time increament
-%           ndof_s    : Total number of DoFs for the solid domain
-%           ndof_c    : Total number of DoFs for the fluid domain
 %           fixed_dofs: DoFs related to essential boundary conditions (for
 %                       both fluid and solid)
 %           Pvar0     : Values of primary variables at previous time step, 
@@ -34,10 +32,10 @@ dPvar = zeros(size(Pvar));          % change of the primary variable
 iter = 1;                           % iteration counter
 converged = 0;                      % convergence indicator
 
-s_dof = 1:ndof_s;                   % solid dofs
-c_dof = ndof_s+1 : ndof_s+ndof_c;   % fluid dofs
+s_dof = 1:SMesh.ndof;                   % solid dofs
+c_dof = SMesh.ndof+1 : SMesh.ndof+sum([CMesh.fdof]);   % fluid dofs
 
-free_dofs = setdiff(1:ndof_s+ndof_c, fixed_dofs);   % free dofs
+free_dofs = setdiff(1:SMesh.ndof+sum([CMesh.fdof]), fixed_dofs);   % free dofs
 
 R = zeros(length(Pvar0),1);         % residual of the coupled system
 
