@@ -62,8 +62,8 @@ while (iter <= max_iter) && ~converged
     
     % Computer tangential matrices
     [Mu, Ku, Kcoh, Kup, Kpu, Kpp, Fcoh, Fp, Kpp_L, FL] = ...
-        ComputeCoupledMatrices(Pvar(s_dof), Pvar(c_dof), Pvar0(s_dof), ...
-            Pvar0(c_dof), t, update, SMesh, CMesh, Material, Control, Domain);
+        ComputeCoupledMatrices(Pvar(s_dof), Pvar(c_dof),  ...
+             t, update, SMesh, CMesh, Material, Control, Domain);
     
     if update
         Kuu = Ku;
