@@ -147,47 +147,57 @@ for np = 1:npulse
                 return
             end
 
-        disp(['\t', num2str(toc),': Computing fracture aperture'])
+        % Propagate cracks
+            [SMesh, CMesh, Pvar, Pvar0, Pvar_1, prop] = ...
+                Propagate(SMesh, CMesh, Material, Domain);
 
         % Compute fracture aperture
-        CMesh = Aperture(Pvar(1:s_dof), SMesh, CMesh);
+            disp(['\t', num2str(toc),': Computing fracture aperture'])
+            CMesh = Aperture(Pvar(1:SMesh.ndof), SMesh, CMesh);
 
-        %% Post processing
-        [SMesh, CMesh, Pvar, Pvar0, Pvar_1, s_dof, f_dof, fdof, enrDOFs, prop] = PostProcessing(Pvar, Pvar0, Pvar_1, ...
-            stdDOFs, enrDOFs, Vcr, Vinj, NR, t, nt, save_on, dynamic_ON, dt, SMesh, CMesh, Material, Domain, Control);
-
-        % move on to the next time step if fracture stopped propagating
-        if ~prop
-
-            if save_on
-               for n = 1:Domain.ncrack 
-                    p0t(nt+1,n) = Pvar(pressdofs(n));           % wellbore pressure
-                    w0t(nt+1,n) = CMesh(n).w(WB_node(n));       % wellbore aperture
-                    tip         = CMesh(n).tip_nodes;           % tip nod of the crack mesh
-                    Lt(nt+1,n)  = CMesh(n).CrackLength(tip);    % fracture length
-                    tn(nt+1)    = t;                            % time
-               end
+        % Post processing
+            % if stopped propagating turn post-processing on
+            if ~prop && ~save_on
+                save_on = 1;
             end
 
-            if Control.Dynamic_ON && ~dynamic_ON               % initial time step of a dynamic analysis
-                Pvar_1 = Pvar;
-                Pvar0  = Pvar;
+            if save_on && ~mod(n,Control.Postprocessing.OutputFreq)
+                PostProcessing(Pvar, Pvar0, Pvar_1, dynamic_ON, t, n, dt, NR,...
+                        SMesh, CMesh, Material, Domain, Control);
+            end
+
+        % Move on to the next time step if fracture stopped propagating
+            if ~prop
+
+                if save_on
+                   for n = 1:Domain.ncrack 
+                        p0t(nt+1,n) = Pvar(pressdofs(n));           % wellbore pressure
+                        w0t(nt+1,n) = CMesh(n).w(SMesh.WB_node(n));       % wellbore aperture
+                        tip         = CMesh(n).tip_nodes;           % tip nod of the crack mesh
+                        Lt(nt+1,n)  = CMesh(n).CrackLength(tip);    % fracture length
+                        tn(nt+1)    = t;                            % time
+                   end
+                end
+
+                if Control.Dynamic_ON && ~dynamic_ON               % initial time step of a dynamic analysis
+                    Pvar_1 = Pvar;
+                    Pvar0  = Pvar;
+                else
+                    Pvar_1 = Pvar0;
+                    Pvar0  = Pvar;
+                end
+
+                nt  = nt + 1;
+                t0  = t;
+
+                dt = Control.Time.dtmin;
+                t = t + dt;
+                dynamic_ON = Control.Dynamic_ON;
+                save_on = 1;
+                fprintf('\nt = %0.6f s \n', t);
             else
-                Pvar_1 = Pvar0;
-                Pvar0  = Pvar;
+                save_on = 0;
             end
-
-            nt  = nt + 1;
-            t0  = t;
-
-            dt = Control.Time.dtmin;
-            t = t + dt;
-            dynamic_ON = Control.Dynamic_ON;
-            save_on = 1;
-            fprintf('\nt = %0.6f s \n', t);
-        else
-            save_on = 0;
-        end
     end
 end
 
