@@ -69,7 +69,7 @@ for np = 1:npulse
         if ~isfolder(new_dir)
             mkdir(new_dir)
         end
-        Control.OutPath = [iopath 'pulse' num2str(np) '\'];      % Change path
+        Control.OutPath = new_dir;      % Change path
 
         dt = Control.Time.dtmin;                % time increment
         t0 = -dt;                               % initial time
