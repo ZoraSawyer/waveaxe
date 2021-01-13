@@ -27,6 +27,7 @@ tic
     n_WB = SMesh.nodes(SMesh.WBnodes,:)...
             - repmat(Domain.WB(1).center,length(SMesh.WBnodes),1);
     n_WB = n_WB ./ Domain.WB(1).radius;
+    Cwb  = 2*pi*Domain.WB(1).radius / length(SMesh.WBnodes);
 
     % initializing primary variables
     S0  = [Domain.InsituStress.Sx,  Domain.InsituStress.Sxy;
@@ -35,7 +36,6 @@ tic
     count = 0;
     WB_node = zeros(Domain.ncrack,1);
     L       = zeros(Domain.ncrack,1);
-    Sn_max  = 0;
 
     p_hyd = Domain.GravityAcceleration * Domain.Depth * Material.fluid.rho; % Hydro-static pressure
 
@@ -44,7 +44,7 @@ tic
         count = count + CMesh(n).fdof;
 
         WB_node(n) = CMesh(n).start_nodes;  % Wellbore node of the crack mesh
-        tip        = CMesh(n).tip_nodes;    % tip nod of the crack mesh
+        tip        = CMesh(n).tip_nodes;    % tip node of the crack mesh
         L(n) = CMesh(n).CrackLength(tip);   % initial length of the fracture
     end
 
@@ -71,7 +71,7 @@ for np = 1:npulse
         end
         Control.OutPath = [iopath 'pulse' num2str(np) '\'];      % Change path
 
-        dt = Control.Time.dtmin;                % time increament
+        dt = Control.Time.dtmin;                % time increment
         t0 = -dt;                               % initial time
         t  = t0 + dt;
         
@@ -83,18 +83,9 @@ for np = 1:npulse
         end
         
         save_on = 1;                            % indicates when to save variables
-
-        E   = Material.solid.constitutive.constant(1);   % elastic Modulus [Pa]
-        nu  = Material.solid.constitutive.constant(2);   % Poisson's ratio of the solid [-]
-        Gc  = Material.solid.FractureEnergy;             % Fracture Energy of the solid [J/m^2]
-        Rw  = Domain.WB(1).radius;                       % Radius of the wellbore [m]
-        E_p = E/(1-nu^2);                                % plain strain modulus [Pa]
-
-        Vinj = zeros(1,Domain.ncrack);
-        Vcr  = zeros(1,Domain.ncrack);
+        dynamic_ON = 0;                         % set initial analysis mode to static
 
         tend = Control.Time.tend;               % final time
-        dynamic_ON = 0;                         % set initial analysis mode to static
 
         p0t  = zeros(length(t:dt:tend),Domain.ncrack);
         w0t  = zeros(length(t:dt:tend),Domain.ncrack);
@@ -105,22 +96,27 @@ for np = 1:npulse
     while t <= tend
 
         disp(['\t', num2str(toc),': SOLVING THE SYSTEM OF EQUATIONS'])
+
         % Initialize variables for timestep nt
             % updating force (NBC)
             Force = zeros(SMesh.ndof + sum([CMesh.fdof]),1);
 
             % updating fixed DoFs (EBC)
-            count     = 0;
-            count2    = 0;
-            tipdofs   = zeros(1, Domain.ncrack*2*SMesh.nsd);
+            % tip aperture is zero (restrain enriched dofs)
+            % pressure at the wellbore is defined
+            tip_count = 0;
+            wb_count = 0;
+            tipdofs = zeros(1, Domain.ncrack*2*SMesh.nsd);
             pressdofs = zeros(1, Domain.ncrack);
 
             for n = 1:Domain.ncrack
-                sctr = GetScatter(CMesh(n).smesh_tipedgenodes, SMesh);
-                tipdofs(count+1:count+2*SMesh.nsd) = sctr(end-3:end);     % tip dofs of the n-th crack
-                pressdofs(n) = s_dof + count2 + 1;                  % Wellbore pressure dof of the n-th crack
-                count = count + 2*SMesh.nsd;
-                count2 = count2 + fdof(n);
+                tip_sctr = GetScatter(CMesh(n).smesh_tipedgenodes, SMesh);
+                % tip dofs of the n-th crack
+                tipdofs(tip_count+1:tip_count+2*SMesh.nsd) = tip_sctr(end-3:end);     
+                % Wellbore pressure dof of the n-th crack
+                pressdofs(n) = SMesh.ndof + wb_count + 1;                  
+                tip_count = tip_count + 2*SMesh.nsd;
+                wb_count = wb_count + CMesh(n).fdof;
             end    
 
             fixed_dofs = [SMesh.top_edge_y, SMesh.bot_edge_y, SMesh.left_edge_x, SMesh.right_edge_x, tipdofs, pressdofs];
@@ -129,13 +125,9 @@ for np = 1:npulse
             converged_Q = 0;                        % flow rate convergence indicator
             max_iter_Q  = 100;                      % maximum number of iterations for flow rate adjustment
 
-
         % Update WB pressure
             dpw = Wellbore(t, Material, Control, 'time');      % wellbore pressure at time t
-
             pw = p_hyd + dpw;                       % update wellbore pressure
-
-            Cwb  = 2*pi*Domain.WB(1).radius / length(WBnodes);
 
             % pressure on well bore
             for i = 1:length(WBnodes)
