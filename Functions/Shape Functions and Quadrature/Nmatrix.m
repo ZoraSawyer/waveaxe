@@ -1,4 +1,4 @@
-function [N, J] = Nmatrix(xi, xI, conn, enrnodes, fI, etype, nsd, sign)
+function [Nv, J] = Nmatrix(xi, xI, conn, enrnodes, fI, etype, nsd, sign)
 %NMATRIX Computes FEM/XFEM shape functions and the corresponding Jacobian at a
 % given point of an element
 %
@@ -29,12 +29,16 @@ end
 nne  = size(conn,2);                        % number of nodes per element
 enrH = length(find(enrnodes == 1));         % Number of nodes enriched by Heaviside function
 
+[Nvstd,dNdxi] = LagrangeBasis(etype,xi,nsd);    % calculating shape functions
+Nv = zeros(nsd,nsd*(nne+enrH));
+Nv(:,1:nsd*nne) = Nvstd';
+J = dNdxi'*xI;
+
 if any(enrnodes)    % enriched nodes exist
-    count = 0;
     switch sign
         case 0
-            [Nv,~] = LagrangeBasis('Q4',xi,1);    % calculating shape functions for interpolating LS (linear)
-            f = fI(1:4)*Nv;
+            N = LagrangeBasis('Q4',xi,1);    % calculating shape functions for interpolating LS (linear)
+            f = fI(1:4)*N;
             if f>=0
                 phi = 0.5;
             elseif f<0
@@ -45,26 +49,19 @@ if any(enrnodes)    % enriched nodes exist
         case -1     % negative side
             phi = -0.5;
     end
-end
 
-[Nv,dNdxi] = LagrangeBasis(etype,xi,1);    % calculating shape functions
-N = zeros(nsd,nsd*(nne+enrH));
-J = dNdxi'*xI;
-
-% forming N matrix
-for i = 1:nne
-    dofrange = ((i-1)*nsd+1):i*nsd;     % local DOF range (for 2D, 2i-1:2i  ;  for 3D, 3i-2:3i  ;  for 1D, i)
-    N(:,dofrange) = Nv(i)*eye(nsd);
-    
-    if enrnodes(i) == 1                 % Heaviside enrichment
+    % forming N matrix
+    count = 0;
+    for i = find(enrnodes==1)
         count = count + 1;
         if fI(i)>0
             phiI = 0.5;
         elseif fI(i)<0
             phiI = -0.5;
         end
-        dofrange = nne*nsd + (((count-1)*nsd+1):count*nsd);
-        N(:,dofrange) = Nv(i)*(phi-phiI)*eye(nsd);
+        dofrange = (((i-1)*nsd+1):i*nsd);
+        new_dofrange = nne*nsd + (((count-1)*nsd+1):count*nsd);
+        Nv(:,new_dofrange) = Nvstd(dofrange,:)*(phi-phiI);
     end
 end
 end
