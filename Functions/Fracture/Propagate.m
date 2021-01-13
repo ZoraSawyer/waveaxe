@@ -1,5 +1,5 @@
 function [SMesh, CMesh, Pvar, Pvar0, Pvar_1, prop] = ...
-	Propagate(SMesh, CMesh, Material, Domain)
+	Propagate(Pvar, Pvar0, Pvar_1, SMesh, CMesh, Material, Domain)
 
 	fdof = [CMesh.fdof];
 
