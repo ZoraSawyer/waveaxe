@@ -28,18 +28,10 @@ tic
             - repmat(Domain.WB(1).center,length(SMesh.WBnodes),1);
     n_WB = n_WB ./ Domain.WB(1).radius;
 
-    s_dof = stdDOFs + enrDOFs;              % total number of solid DoFs
-    fdof  = zeros(Domain.ncrack,1);                
-    f_dof = 0;
-    for n = 1:Domain.ncrack
-        fdof(n) = size(CMesh(n).nodes,1);   % number of dofs of the n-th each crack
-        f_dof   = f_dof + fdof(n);          % total number of fluid DoFs
-    end
-
     % initializing primary variables
     S0  = [Domain.InsituStress.Sx,  Domain.InsituStress.Sxy;
            Domain.InsituStress.Sxy, Domain.InsituStress.Sy];
-    p = zeros(f_dof,1);
+    p = zeros(sum([CMesh.fdof]),1);
     count = 0;
     WB_node = zeros(Domain.ncrack,1);
     L       = zeros(Domain.ncrack,1);
@@ -48,15 +40,16 @@ tic
     p_hyd = Domain.GravityAcceleration * Domain.Depth * Material.fluid.rho; % Hydro-static pressure
 
     for n = 1:Domain.ncrack   
-        p(count+1:count+fdof(n)) = p_hyd;     % initial pressure in the n-th fracture
-        count = count + fdof(n);
+        p(count+1:count+CMesh(n).fdof) = p_hyd;     % initial pressure in the n-th fracture
+        count = count + CMesh(n).fdof;
 
         WB_node(n) = CMesh(n).start_nodes;  % Wellbore node of the crack mesh
         tip        = CMesh(n).tip_nodes;    % tip nod of the crack mesh
         L(n) = CMesh(n).CrackLength(tip);   % initial length of the fracture
     end
 
-    d = zeros(s_dof,1);
+    d = zeros(SMesh.ndof,1);
+    p = p_hyd*ones(sum([CMesh.fdof]),1);
     Pvar0  = [d; p];
     Pvar_1 = Pvar0;
 
@@ -114,7 +107,7 @@ for np = 1:npulse
         disp(['\t', num2str(toc),': SOLVING THE SYSTEM OF EQUATIONS'])
         % Initialize variables for timestep nt
             % updating force (NBC)
-            Force = zeros(s_dof + f_dof,1);
+            Force = zeros(SMesh.ndof + sum([CMesh.fdof]),1);
 
             % updating fixed DoFs (EBC)
             count     = 0;
@@ -155,8 +148,9 @@ for np = 1:npulse
 
         % Newton-Raphson iteration    
             [Pvar, q, NR, NRs, NRf, converged] = NRiter(Force, t, dt, ...
-                s_dof, f_dof, fixed_dofs, Pvar0, Pvar_1, dynamic_ON, ...
+                fixed_dofs, Pvar0, Pvar_1, dynamic_ON, ...
                 SMesh, CMesh, Material, Control, Domain);
+
             if ~converged   % terminates the program if convergence is failed
                 return
             end
