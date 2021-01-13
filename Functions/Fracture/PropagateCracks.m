@@ -126,7 +126,6 @@ for i = 1:ntips
         tip_edgenodes = enodes(edges(tip_edge,:));
         tip = CMesh(i).tip_nodes;                                                 % old tip node of the crack
         length_cr = CMesh(i).CrackLength(tip) + norm(xtip-CMesh(i).nodes(tip,:)); % crack length at the new tip node
-    %     xtip
         %********************************************
         % element eID2 will now have to be enriched, so set of data structures
         % to make this happend
@@ -202,6 +201,7 @@ for i = 1:ntips
         cr_conn_neg = 2.*CMesh(i).conn;     % negative side connectivity
 
         CMesh(i).conn2D = [cr_conn_pos(:,1) cr_conn_neg cr_conn_pos(:,2)];
+        CMesh(i).fdof = size(CMesh(i).nodes,1);
     end
 end
 
