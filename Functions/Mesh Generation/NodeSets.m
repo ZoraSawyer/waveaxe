@@ -63,5 +63,9 @@ SMesh.nsd = size(SMesh.nodes,2);
 
     SMesh.stdDOFs = size(SMesh.nodes,1)*nsd;      % number of standard DoFs
     SMesh.enrDOFs = length(SMesh.EnrNodes)*nsd;   % number of enriched DoFs
+    SMesh.ndof = SMesh.stdDOFs + SMesh.enrDOFs;
+
+    SMesh.xdofs = 1:2:SMesh.stdDOFs-1;       % x-direction dofs
+    SMesh.ydofs = 2:2:SMesh.stdDOFs;         % y-direction dofs
 
 end
