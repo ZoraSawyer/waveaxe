@@ -5,7 +5,7 @@ function [SMesh, CMesh, Pvar, Pvar0, Pvar_1, prop] = ...
 
 	% ========================= COMPUTE SOLID STRESS ==========================
 	% Compute Nodal Stresses
-	disp(['\t', num2str(toc),': Computing stress in solid'])
+	fprintf('\t%.2f: Computing stress in solid\n', toc);
 	S = ComputeNodalStress(Pvar(1:SMesh.ndof), SMesh, Material, Domain);   % Compute stress at nodes
 
 	% in situ stress
@@ -19,7 +19,7 @@ function [SMesh, CMesh, Pvar, Pvar0, Pvar_1, prop] = ...
 
 	% ======================== FRACTURE PROPAGATION ===========================
 	% Check for fracture propagation
-	disp(['\t', num2str(toc),': Evaluating fracture propagation criterion'])
+	fprintf('\t%.2f: Evaluating fracture propagation criterion\n', toc);
 	if ~isempty(CMesh(1).conn)   % at least one fracture exists
 	    % CHECKING FOR FRACTURE PROPAGATION
 	    gplot = 0;  % plot mode is on when gplot = 1; used for debugging purposes

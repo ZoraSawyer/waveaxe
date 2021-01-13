@@ -44,9 +44,9 @@ NRs = zeros(max_iter,1);
 NRf = zeros(max_iter,1);
 
 if dynamic_ON
-    disp(['\t', num2str(toc), ': Dynamic Analysis'])
+    fprintf('\t%.2f: Dynamic Analysis\n', toc);
 else
-    disp(['\t', num2str(toc), ': Quasi-static Analysis'])
+    fprintf('\t%.2f: Quasi-static Analysis\n', toc);
 end
 
 msg_len = 1;

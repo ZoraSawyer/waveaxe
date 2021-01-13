@@ -95,7 +95,8 @@ for np = 1:npulse
     % Run through timesteps
     while t <= tend
 
-        disp(['\t', num2str(toc),': SOLVING THE SYSTEM OF EQUATIONS'])
+        fprintf('\n\tt = %0.6f s \n', t);
+        fprintf('\t%.2f: SOLVING THE SYSTEM OF EQUATIONS\n', toc);
 
         % Initialize variables for timestep nt
             % updating force (NBC)
@@ -152,7 +153,7 @@ for np = 1:npulse
                 Propagate(SMesh, CMesh, Material, Domain);
 
         % Compute fracture aperture
-            disp(['\t', num2str(toc),': Computing fracture aperture'])
+            fprintf('\t%.2f: Computing fracture aperture\n', toc);
             CMesh = Aperture(Pvar(1:SMesh.ndof), SMesh, CMesh);
 
         % Post processing
@@ -194,7 +195,6 @@ for np = 1:npulse
                 t = t + dt;
                 dynamic_ON = Control.Dynamic_ON;
                 save_on = 1;
-                fprintf('\nt = %0.6f s \n', t);
             else
                 save_on = 0;
             end

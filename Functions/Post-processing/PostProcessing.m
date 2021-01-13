@@ -9,7 +9,7 @@ function PostProcessing(Pvar, Pvar0, Pvar_1, dynamic_ON,t, n, dt, NR,...
 %       prop = 0, no fracture propagation
 % Written by Matin Parchei Esfahani, University of Waterloo, April 2016
 
-    disp(['\t', num2str(toc), ': Post processing']);
+    fprintf('\t%.2f: Post processing\n', toc);
    
     % Writing results of the current time step to file
     dMagCoef = Control.MagCoef;  % displacement magnification coeficient
