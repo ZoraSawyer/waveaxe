@@ -150,7 +150,7 @@ for np = 1:npulse
 
         % Propagate cracks
             [SMesh, CMesh, Pvar, Pvar0, Pvar_1, prop] = ...
-                Propagate(SMesh, CMesh, Material, Domain);
+                Propagate(Pvar, Pvar0, Pvar_1, SMesh, CMesh, Material, Domain);
 
         % Compute fracture aperture
             fprintf('\t%.2f: Computing fracture aperture\n', toc);
