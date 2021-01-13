@@ -57,12 +57,12 @@ SMesh.nsd = size(SMesh.nodes,2);
 
     % Wellbore DoFs
     sctr = GetScatter(SMesh.WBnodes, SMesh);
-    sctr = sctr(1:nsd*length(SMesh.WBnodes));     % standard DoFs
+    sctr = sctr(1:SMesh.nsd*length(SMesh.WBnodes));     % standard DoFs
     SMesh.WB_x = sctr(1:2:end-1);                 % x-DoF
     SMesh.WB_y = sctr(2:2:end);                   % y-DoF
 
-    SMesh.stdDOFs = size(SMesh.nodes,1)*nsd;      % number of standard DoFs
-    SMesh.enrDOFs = length(SMesh.EnrNodes)*nsd;   % number of enriched DoFs
+    SMesh.stdDOFs = size(SMesh.nodes,1)*SMesh.nsd;      % number of standard DoFs
+    SMesh.enrDOFs = length(SMesh.EnrNodes)*SMesh.nsd;   % number of enriched DoFs
     SMesh.ndof = SMesh.stdDOFs + SMesh.enrDOFs;
 
     SMesh.xdofs = 1:2:SMesh.stdDOFs-1;       % x-direction dofs
