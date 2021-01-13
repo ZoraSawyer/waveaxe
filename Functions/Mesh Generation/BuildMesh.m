@@ -391,7 +391,7 @@ disp([num2str(toc),': Reading config file...']);
           CMesh(nc).CrackLength        = length_cr;
           CMesh(nc).GLconn             = glconn;                      % global connectivity of crack
           CMesh(nc).t0                 = zeros(size(conn_cr,1),1);
-          
+          CMesh(nc).fdof               = size(CMesh(nc).nodes,1);      
       end     % loop on cracks
   end
 
