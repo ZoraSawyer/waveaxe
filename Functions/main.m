@@ -61,7 +61,7 @@ tic
 % Loop through pressure pulses
 for np = 1:npulse
     
-    fprintf('PULSE %d\n', np);
+    fprintf('\nPULSE %d\n', np);
 
     % Initialize variables for pulse np
         % change output path to save keep pulse data separate
