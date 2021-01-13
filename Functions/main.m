@@ -131,10 +131,10 @@ for np = 1:npulse
             pw = p_hyd + dpw;                       % update wellbore pressure
 
             % pressure on well bore
-            for i = 1:length(WBnodes)
+            for i = 1:length(SMesh.WBnodes)
                 fwb = Cwb * (pw*eye(SMesh.nsd) + S0) * n_WB(i,:)';
-                Force(WB_x(i)) = fwb(1);
-                Force(WB_y(i)) = fwb(2);
+                Force(SMesh.WB_x(i)) = fwb(1);
+                Force(SMesh.WB_y(i)) = fwb(2);
             end
 
             Pvar0(pressdofs) = pw;
@@ -173,7 +173,7 @@ for np = 1:npulse
                 if save_on
                    for n = 1:Domain.ncrack 
                         p0t(nt+1,n) = Pvar(pressdofs(n));           % wellbore pressure
-                        w0t(nt+1,n) = CMesh(n).w(SMesh.WB_node(n));       % wellbore aperture
+                        w0t(nt+1,n) = CMesh(n).w(WB_node(n));       % wellbore aperture
                         tip         = CMesh(n).tip_nodes;           % tip nod of the crack mesh
                         Lt(nt+1,n)  = CMesh(n).CrackLength(tip);    % fracture length
                         tn(nt+1)    = t;                            % time

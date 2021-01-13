@@ -410,6 +410,7 @@ disp([num2str(toc),': Reading config file...']);
      for cWB = 1:nWB
           WBnodes(dWB <= Domain.WB(cWB).radius*1.01) = cWB;
      end
+     WBnodes = find(WBnodes == 1);
   end
 
 %% Create mesh structure
@@ -448,7 +449,9 @@ disp([num2str(toc),': Reading config file...']);
   scalardata(2).name = 'EnrType';
   scalardata(2).data = EnrType;
   scalardata(3).name = 'Wellbore';
-  scalardata(3).data = WBnodes;
+  WB = zeros(nn,1);
+  WB(WBnodes) = 1;
+  scalardata(3).data = WB;
   count = 4;
   for nc = 1:ncrack
       scalardata(count).name = ['gI', num2str(nc)];
